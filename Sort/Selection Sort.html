@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    //以升序为例
+    function SelectionSort(Array) {
+      let minIndex
+      for (i = 0; i < Array.length - 1; i++) {
+        let minIndex = i  //假定索引为i的是最小项
+        for (j = i + 1; j < Array.length; j++) {
+          if (Array[minIndex] > Array[j]) {
+            minIndex = j //交换最小项的索引
+          }
+        }
+        let temp
+        temp = Array[i]
+        Array[i] = Array[minIndex]
+        Array[minIndex] = temp
+      }
+      return Array
+    }
+    let arr = [4, 6, 8, 4, 9, -2, 8, 1]
+    console.log("排序前:", arr)
+    console.log("排序后:", SelectionSort(arr))
+  </script>
+</body>
+
+</html>

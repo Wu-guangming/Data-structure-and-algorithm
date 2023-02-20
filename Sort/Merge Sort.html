@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function MergeSort(arr) {  //采用自上而下的递归方法
+      var len = arr.length;
+      if (len < 2) {
+        return arr;
+      }
+      var middle = Math.floor(len / 2),
+        left = arr.slice(0, middle),
+        right = arr.slice(middle);
+      return merge(MergeSort(left), MergeSort(right));
+    }
+
+    function merge(left, right) {
+      var result = [];
+
+      while (left.length && right.length) {
+        //每次将小的推入result中
+        if (left[0] <= right[0]) {
+          result.push(left.shift());
+        } else {
+          result.push(right.shift());
+        }
+      }
+      while (left.length)
+        result.push(left.shift());
+
+      while (right.length)
+        result.push(right.shift());
+
+      return result;
+    }
+    let arr = [8, 4, 5, 7, 1, 3, 6, 2]
+    console.log("排序前:", arr)
+    console.log("排序后:", MergeSort(arr))
+  </script>
+</body>
+
+</html>

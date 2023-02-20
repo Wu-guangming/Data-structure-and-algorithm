@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function InsertionSort(arr) {
+      for (i = 1; i < arr.length; i++) {
+        let current = arr[i]
+        let preIndex = i - 1
+        while (preIndex >= 0 && arr[preIndex] > current) {
+          arr[preIndex + 1] = arr[preIndex]
+          preIndex--
+        }
+        arr[preIndex + 1] = current
+      }
+      return arr
+    }
+    let arr = [4, 3, 2, 10, 12, 1, 5, 6]
+    console.log("排序前:", arr)
+    console.log("排序后:", InsertionSort(arr))
+  </script>
+</body>
+
+</html>
