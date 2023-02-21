@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    //arr为要排序的数组,start为需要排序的起始位置索引,end为要排序的结束位置索引
+    function QuickSort(arr, start, end) {
+      var len = arr.length,
+        partitionIndex,
+        start = typeof start != 'number' ? 0 : start,
+        end = typeof end != 'number' ? len - 1 : end;
+
+      if (start < end) {
+        partitionIndex = partition(arr, start, end);
+        QuickSort(arr, start, partitionIndex - 1);
+        QuickSort(arr, partitionIndex + 1, end);
+      }
+      return arr;
+    }
+
+    function partition(arr, start, end) {     //分区操作
+      var pivot = start//设定基准值（pivot）
+      index = pivot + 1
+      for (var i = index; i <= end; i++) {
+        if (arr[i] < arr[pivot]) {
+          swap(arr, i, index);
+          index++;
+        }
+      }
+      swap(arr, pivot, index - 1);
+      return index - 1;
+    }
+
+    function swap(arr, i, j) {
+      var temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+    let arr = [6, 1, 2, 7, 9, 3, 4, 5, 8]
+    console.log("排序前:", arr)
+    console.log("排序后:", QuickSort(arr))
+  </script>
+</body>
+
+</html>

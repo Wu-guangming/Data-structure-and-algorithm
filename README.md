@@ -257,6 +257,126 @@
   </script>
 ```
 
+## 快速排序(Quick Sort)
+
+时间复杂度为O(n log n)
+
+需求:
+
+​	排序前:(6,1,2,7,9,3,4,5,8)
+
+​	排序后:(1,2,3,4,5,6,7,8,9)
+
+排序原理:
+
+​	1.首先设定一个分界值,通过该分界值将数组分成左右两部分
+
+​	2.将大于或等于该分界值的元素放到数组右边,小于该分界值的的元素放到数组左		边;此时分界值左边的元素都小于该分界值的,分界值右边的元素都小于或等于		该分界值
+
+​	3.然后,左边和右边的数组数据又可以独立排序,对左边的数组数据又可以取一个		分界值将数据分成两部分,分界值左边存放较小值,分界值右边存放较大值;对右		侧的数组数据同样如此操作
+
+​	4.重复上述过程,可以看出这是一个递归过程,通过递归将左侧数据拍好后在递归		排好右侧数据,当左右两侧数据都排好后,整个数组数据就排序完成了
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221101251656.png" alt="image-20230221101251656" style="zoom:80%;" />
+
+代码实现(js):
+
+```
+ <script>
+    //arr为要排序的数组,start为需要排序的起始位置索引,end为要排序的结束位置索引
+    function QuickSort(arr, start, end) {
+      var len = arr.length,
+        partitionIndex,
+        start = typeof start != 'number' ? 0 : start,
+        end = typeof end != 'number' ? len - 1 : end;
+
+      if (start < end) {
+        partitionIndex = partition(arr, start, end);
+        QuickSort(arr, start, partitionIndex - 1);
+        QuickSort(arr, partitionIndex + 1, end);
+      }
+      return arr;
+    }
+
+    function partition(arr, start, end) {     //分区操作
+      var pivot = start//设定基准值（pivot）
+      index = pivot + 1
+      for (var i = index; i <= end; i++) {
+        if (arr[i] < arr[pivot]) {
+          swap(arr, i, index);
+          index++;
+        }
+      }
+      swap(arr, pivot, index - 1);
+      return index - 1;
+    }
+
+    function swap(arr, i, j) {
+      var temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+    let arr = [6, 1, 2, 7, 9, 3, 4, 5, 8]
+    console.log("排序前:", arr)
+    console.log("排序后:", QuickSort(arr))
+  </script>
+```
+
+## 堆排序(Heap Sort)
+
+代码实现(js)
+
+```
+<script>
+    var len;    //因为声明的多个函数都需要数据长度，所以把len设置成为全局变量
+    function buildMaxHeap(arr) {   //建立大顶堆
+      len = arr.length;
+      for (var i = Math.floor(len / 2); i >= 0; i--) {
+        heapify(arr, i);
+      }
+    }
+
+    function heapify(arr, i) {     //堆调整
+      var left = 2 * i + 1,
+        right = 2 * i + 2,
+        largest = i;
+
+      if (left < len && arr[left] > arr[largest]) {
+        largest = left;
+      }
+
+      if (right < len && arr[right] > arr[largest]) {
+        largest = right;
+      }
+
+      if (largest != i) {
+        swap(arr, i, largest);
+        heapify(arr, largest);
+      }
+    }
+
+    function swap(arr, i, j) {
+      var temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+
+    function HeapSort(arr) {
+      buildMaxHeap(arr);
+
+      for (var i = arr.length - 1; i > 0; i--) {
+        swap(arr, 0, i);
+        len--;
+        heapify(arr, 0);
+      }
+      return arr;
+    }
+    let arr = [91, 69, 96, 13, 35, 65, 46, 65, 10, 30, 20]
+    console.log("排序前:", arr)
+    console.log("排序后:", HeapSort(arr))
+  </script>
+```
+
 
 
 # 线性表(List)
