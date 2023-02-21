@@ -384,3 +384,203 @@
 线性表是n个具有相同特性的元素的有限序列
 
 分为顺序表和链表
+
+# 栈(Stack)
+
+栈是一种遵循***后进先出(LIFO)***原则的有序集合,在栈里新元素都靠近栈顶,旧元素都靠近栈底.
+
+在js中可以创建一个类来表示栈,并利用数组来保存栈中的元素
+
+代码实现(**创建一个基于数组的栈**):
+
+```
+<script>
+    //创建一个类来表示栈
+    class Stack {
+      constructor() {
+        this.items = [];//利用数组来保存栈里的元素
+      }
+      //push(element(s)): 添加一个(或儿个)新元素到栈顶
+      push(element) {
+        this.items.push(element);
+      };
+      //pop(): 移除栈顶的元素，同时返回被移除的元素
+      pop() {
+        return this.items.pop();
+      };
+      //peek(): 返回栈顶的元素, 不对栈做任何修改(该方法不会移除栈顶的元素, 仅仅返回它)
+      peek() {
+        return this.items[this.items.length - 1]
+      };
+      //isEmpty(): 如果栈里没有任何元素就返回true.否则返回false
+      isEmpty() {
+        return this.items.length === 0
+      };
+      //clear(): 移除栈里的所有元素
+      clear() {
+        this.items = []
+      };
+      //size(): 返回栈里的元素个数。该方法和数组的length属性很类似
+      size() {
+        return this.items.length
+      };
+    }
+    //使用stack
+    const stack = new Stack()
+    console.log(stack.isEmpty())//true
+    stack.push(5)
+    stack.push(8)
+    console.log(stack.peek())//8
+    stack.push(11)
+    stack.push(15)
+    stack.pop()
+    stack.pop()
+    console.log(stack.size())//2
+
+  </script>
+```
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163048205.png" alt="image-20230221163048205" style="zoom:80%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163119189.png" alt="image-20230221163119189" style="zoom:80%;" />
+
+在js中我们也可以通过js对象来存储所有栈元素并遵循LIFO原则
+
+代码实现(**js基于对象实现栈**):
+
+```
+<script>
+    //创建一个基于object的栈,并用count属性来记录栈的大小
+    class Stack {
+      constructor() {
+        this.count = 0;
+        this.items = {};
+      }
+      push(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      pop() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result;
+      };
+      peek() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      };
+      isEmpty() {
+        return this.count === 0
+      };
+      clear() {
+        this.count = 0
+        this.items = {}
+      };
+      size() {
+        return this.count
+      };
+      //打印栈中所有元素
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[0]}`
+        for (let i = 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    const stack = new Stack()
+    console.log(stack.isEmpty())//true
+    stack.push(5)
+    stack.push(8)
+    console.log(stack.peek())//8
+    stack.push(11)
+    stack.push(15)
+    stack.pop()
+    stack.pop()
+    console.log(stack.size())//2
+    console.log(stack.toString())//5,8
+  </script>
+```
+
+案例(十进制转化为二进制):
+
+```
+<script>
+    //创建一个基于object的栈,并用count属性来记录栈的大小
+    class Stack {
+      constructor() {
+        this.count = 0;
+        this.items = {};
+      }
+      push(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      pop() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result;
+      };
+      peek() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      };
+      isEmpty() {
+        return this.count === 0
+      };
+      clear() {
+        this.count = 0
+        this.items = {}
+      };
+      size() {
+        return this.count
+      };
+      //打印栈中所有元素
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[0]}`
+        for (let i = 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    //十进制转化为二进制
+    function decimalToBinary(decNumber) {
+      const remStack = new Stack();
+      let number = decNumber;
+      let rem;
+      let binaryString = '';
+      while (number > 0) {
+        rem = Math.floor(number % 2);
+        remStack.push(rem);
+        number = Math.floor(number / 2);
+        while (!remStack.isEmpty()) {
+          binaryString = remStack.pop().toString() + binaryString;
+        }
+      }
+      return binaryString;
+    }
+    console.log(decimalToBinary(233))//11101001
+    //console.log(decimalToBinary(10))
+    //console.log(decimalToBinary(1000))
+  </script>
+```
+

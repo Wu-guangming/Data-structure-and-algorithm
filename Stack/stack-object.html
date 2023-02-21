@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    //创建一个基于object的栈,并用count属性来记录栈的大小
+    class Stack {
+      constructor() {
+        this.count = 0;
+        this.items = {};
+      }
+      push(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      pop() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result;
+      };
+      peek() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      };
+      isEmpty() {
+        return this.count === 0
+      };
+      clear() {
+        this.count = 0
+        this.items = {}
+      };
+      size() {
+        return this.count
+      };
+      //打印栈中所有元素
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[0]}`
+        for (let i = 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    const stack = new Stack()
+    console.log(stack.isEmpty())//true
+    stack.push(5)
+    stack.push(8)
+    console.log(stack.peek())//8
+    stack.push(11)
+    stack.push(15)
+    stack.pop()
+    stack.pop()
+    console.log(stack.size())//2
+    console.log(stack.toString())//5,8
+  </script>
+</body>
+
+</html>
