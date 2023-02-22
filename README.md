@@ -1,4 +1,6 @@
 # Data-structure-and-algorithm
+***看看就好,别当真***
+
 数据结构与算法
 
 # 排序
@@ -389,7 +391,11 @@
 
 栈是一种遵循***后进先出(LIFO)***原则的有序集合,在栈里新元素都靠近栈顶,旧元素都靠近栈底.
 
-在js中可以创建一个类来表示栈,并利用数组来保存栈中的元素
+在js中可以创建一个类来表示栈,并利用数组来保存栈中的元素,并使用
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163048205.png" alt="image-20230221163048205" style="zoom:80%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163119189.png" alt="image-20230221163119189" style="zoom:80%;" />
 
 代码实现(**创建一个基于数组的栈**):
 
@@ -439,10 +445,6 @@
 
   </script>
 ```
-
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163048205.png" alt="image-20230221163048205" style="zoom:80%;" />
-
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230221163119189.png" alt="image-20230221163119189" style="zoom:80%;" />
 
 在js中我们也可以通过js对象来存储所有栈元素并遵循LIFO原则
 
@@ -511,7 +513,7 @@
   </script>
 ```
 
-案例(十进制转化为二进制):
+***案例***(十进制转化为二进制):
 
 ```
 <script>
@@ -584,3 +586,198 @@
   </script>
 ```
 
+# 队列(Queue)
+
+队列(Queue)是一组遵循***先进先出(FIFO)***原则的有序的项,在队尾添加新元素,从队头移除元素.
+
+js创建一个Queue类并使用
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230222094917539.png" alt="image-20230222094917539" style="zoom:80%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230222094937791.png" alt="image-20230222094937791" style="zoom:80%;" />
+
+代码实现
+
+```
+class Queue {
+      constructor() {
+        this.items = {}//利用js的对象存储
+        this.count = 0//count属性来记录队列大小
+        this.firstCount = 0//用于追踪队列的第一个元素
+      }
+      //enqueue(element(s)): 向队列尾部添加一个(或多个)新的项。
+      enqueue(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      //dequeue(): 移除队列的第一项(即排在队列最前面的项)并返回被移除的元素。
+      dequeue() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        const result = this.items[this.firstCount]
+        delete this.items[this.firstCount]
+        this.firstCount++
+        return result
+      }
+      /* peek(): 返回队列中第一个元素---最先被添加，也将是最先被移除的元素。
+      队列不做任何变动(不移除元素，只返回元素信息 - 与stack类的 peek方法非常类似)。该方法在其他语言中也可以叫作front方法。 */
+      peek() {
+        if (this.isEmpty) {
+          return undefined
+        }
+        return this.items[this.firstCount]
+      }
+      //isEmpty(): 如果队列中不包含任何元素，返回true，否则返回false。
+      isEmpty() {
+        return this.count - this.firstCount === 0
+      }
+      //size(): 返回队列包含的元素个数，与数组的length 属性类似。
+      size() {
+        return this.count - this.firstCount
+      }
+      //clear(): 清空队列
+      clear() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[this.firstCount]}`
+        for (let i = this.firstCount + 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    const queue = new Queue()
+    console.log(queue.isEmpty())//true
+    queue.enqueue('John')
+    queue.enqueue('Jack')
+    console.log(queue.toString())//John,Jack
+    queue.enqueue('Camila')
+    console.log(queue.toString())//John,Jack,Camila
+    console.log(queue.size())//3
+    console.log(queue.isEmpty())//false
+    queue.dequeue()
+    queue.dequeue()
+    console.log(queue.toString())//Camila
+  </script>
+```
+
+***双端队列(deque,或称double-ended queue)***,是一种允许我们同时从队头和队尾添加和移除元素的特殊队列
+
+js创建deque并使用
+
+```
+<script>
+    class Deque {
+      constructor() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //addFront(element):该方法在双端队列前端添加新的元素
+      addFront(element) {
+        if (this.isEmpty()) {
+          addBack(element)
+        } else if (this.firstCount > 0) {
+          this.firstCount--
+          this.items[this.firstCount] = element
+        } else {
+          for (let i = this.count; i > 0; i--) {
+            this.items[i] = this.items[i - 1]
+          }
+          this.count++
+          this.firstCount = 0
+          this.items[0] = element
+        }
+      }
+      //addBack(element):该方法在双端队列后端添加新的元素(实现方法和Queue类中的enqueue方法相同)
+      addBack(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      //removeFront():该方法会从双端队列前端移除第一个元素(实现方法和Queue类中的dequeue方法相同)
+      removeFront() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        let result = this.items[this.firstCount]
+        delete this.items[this.firstCount]
+        this.firstCount++
+        return result
+      }
+      //removeBack():该方法会从双端队列后端移除第一个元素(实现方法和Stack类中的pop 方法一样)
+      removeBack() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result
+      }
+      //peekFront():该方法返回双端队列前端的第一个元素(实现方法和 Queue类中的 peek方法一样)
+      peekFront() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.firstCount]
+      }
+      //peekBack():该方法返回双端队列后端的第一个元素(实现方法和 Stack类中的 peek方法一样)
+      peekBack() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      }
+      isEmpty() {
+
+        return this.count - this.firstCount === 0
+      }
+      //size(): 返回队列包含的元素个数，与数组的length 属性类似
+      size() {
+        return this.count - this.firstCount
+      }
+      //clear(): 清空队列
+      clear() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[this.firstCount]}`
+        for (let i = this.firstCount + 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    const deque = new Deque();
+    console.log(deque.isEmpty()); // 输出 true
+    deque.addBack('John');
+    deque.addBack('Jack');
+    console.log(deque.toString()); //John, Jack
+    deque.addBack('Camila');
+    console.log(deque.toString()); // John, Jack, Camila
+    console.log(deque.size());// 输出3
+    console.log(deque.isEmpty());// 输出 false
+    deque.removeFront();//移除John
+    console.log(deque.toString()); // Jack, Camila
+    deque.removeBack();// Camila 决定离开
+    console.log(deque.toString());// Jack
+    deque.addFront('John');//John 回来询问一些信息
+    console.log(deque.toString()); // John, Jack
+  </script>
+```
+
+案例
