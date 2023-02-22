@@ -513,7 +513,7 @@
   </script>
 ```
 
-***案例***(十进制转化为二进制):
+***案例(十进制转化为二进制)***
 
 ```
 <script>
@@ -586,6 +586,112 @@
   </script>
 ```
 
+***案例(有效的括号)***
+
+Stack使用之前js创建的类(此处省略)
+
+```
+function isVaild(s) {
+      //需要先校验s格式
+      let pattern = /^(\(|\)|\[|\]|\{|\})*$/
+      if (!pattern.test(s)) {
+        return undefined
+      }
+      const stack = new Stack()
+      let vaild = true
+      let str = s.split(" ").join('')
+
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] == '(' || str[i] == '[' || str[i] == '{') {
+          stack.push(str[i])
+        } else if (str[i] == ')' && stack.size() !== 0 && stack.peek() == '(') {
+          stack.pop()
+        } else if (str[i] == ']' && stack.size() !== 0 && stack.peek() == '[') {
+          stack.pop()
+        } else if (str[i] == '}' && stack.size() !== 0 && stack.peek() == '{') {
+          stack.pop()
+        } else {
+          vaild = false
+          break
+        }
+      }
+      if (stack.size() == 0 && vaild == true) {
+        return true
+      } else {
+        return false
+      }
+    }
+    console.log('(()):', isVaild('(())'))
+    console.log('({]:', isVaild('({]'))
+    console.log('{[]):', isVaild('{[])'))
+    console.log('(){}[]:', isVaild('(){}[]'))
+    console.log('({[:', isVaild('({['))
+    console.log('(a)', isVaild('(a)'))
+```
+
+***案例(汉诺塔)***
+
+```
+function towerOfHanoi(plates, source, helper, dest, sourceName, helperName, destName, moves = []) {
+      console.log(moves.length)
+      //如果盘子的数字不大于0 ，那么直接返回moves,终止递归的条件。
+      if (plates <= 0) return moves;
+
+      if (plates === 1) {
+        dest.push(source.pop());
+        const move = {};
+        move[sourceName] = source.toString();
+        move[helperName] = helper.toString();
+        move[destName] = dest.toString();
+        moves.push(move);
+      } else {
+        /*递归调用自身。并且将盘子的数量减少一个，这里交换了dest和helper的位置，是为了dest.push中存入的栈是helper栈，
+        也就是说是为了存入对应的柱子*/
+        towerOfHanoi(plates - 1, source, dest, helper, sourceName, destName, helperName, moves);
+        //从源柱子拿出最顶层的一个放入目标柱子（如果dest和helper互换了位置，那么其实这里的dest实际上代表的是helper）
+        dest.push(source.pop());
+        //声明常量，用来存储当前各个柱子的盘子栈况
+        const move = {};
+        move[sourceName] = source.toString();
+        move[helperName] = helper.toString();
+        move[destName] = dest.toString();
+        // 存入moves
+        moves.push(move);
+        towerOfHanoi(plates - 1, helper, source, dest, helperName, sourceName, destName, moves);
+      }
+      return moves;
+    }
+
+    function hanoiStack(plates) {
+      // 创建每一个柱子的栈对象，source是最开始拥有所有圈圈的柱子，dest是目标柱子，helper是中间的暂存柱子
+      const source = new Stack();
+      const dest = new Stack();
+      const helper = new Stack();
+      //倒序循环把每一个圈圈序号放入source栈
+      for (let i = plates; i > 0; i--) {
+        source.push(i);
+      }
+      //通过return调用towerOfHanoi计算方法。
+      return towerOfHanoi(plates, source, helper, dest, 'source', 'helper', 'dest');
+    }
+    //这个方法是计算在汉诺塔的层数为plates的时候，每一个是从哪个柱子拿到哪个柱子的
+    function hanoi(plates, source, helper, dest, moves = []) {
+      if (plates <= 0) return moves;
+      if (plates === 1) {
+        moves.push([source, dest]);
+      } else {
+        hanoi(plates - 1, source, dest, helper, moves);
+        moves.push([source, dest]);
+        hanoi(plates - 1, helper, source, dest, moves);
+      }
+      return moves;
+    }
+    console.log(hanoiStack(3))
+    console.log(hanoi(3, 'source', 'helper', 'dest'));
+```
+
+
+
 # 队列(Queue)
 
 队列(Queue)是一组遵循***先进先出(FIFO)***原则的有序的项,在队尾添加新元素,从队头移除元素.
@@ -599,7 +705,8 @@ js创建一个Queue类并使用
 代码实现
 
 ```
-class Queue {
+<script>
+    class Queue {
       constructor() {
         this.items = {}//利用js的对象存储
         this.count = 0//count属性来记录队列大小
