@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    class Stack {
+      constructor() {
+        this.count = 0;
+        this.items = {};
+      }
+      push(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      pop() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result;
+      };
+      peek() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      };
+      isEmpty() {
+        return this.count === 0
+      };
+      clear() {
+        this.count = 0
+        this.items = {}
+      };
+      size() {
+        return this.count
+      };
+      //打印栈中所有元素
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[0]}`
+        for (let i = 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    function isVaild(s) {
+      //需要先校验s格式
+      let pattern = /^(\(|\)|\[|\]|\{|\})*$/
+      if (!pattern.test(s)) {
+        return undefined
+      }
+      const stack = new Stack()
+      let vaild = true
+      let str = s.split(" ").join('')
+
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] == '(' || str[i] == '[' || str[i] == '{') {
+          stack.push(str[i])
+        } else if (str[i] == ')' && stack.size() !== 0 && stack.peek() == '(') {
+          stack.pop()
+        } else if (str[i] == ']' && stack.size() !== 0 && stack.peek() == '[') {
+          stack.pop()
+        } else if (str[i] == '}' && stack.size() !== 0 && stack.peek() == '{') {
+          stack.pop()
+        } else {
+          vaild = false
+          break
+        }
+      }
+      if (stack.size() == 0 && vaild == true) {
+        return true
+      } else {
+        return false
+      }
+    }
+    console.log('(()):', isVaild('(())'))
+    console.log('({]:', isVaild('({]'))
+    console.log('{[]):', isVaild('{[])'))
+    console.log('(){}[]:', isVaild('(){}[]'))
+    console.log('({[:', isVaild('({['))
+    console.log('(a)', isVaild('(a)'))
+  </script>
+</body>
+
+</html>
