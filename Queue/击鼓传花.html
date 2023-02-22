@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    class Queue {
+      constructor() {
+        this.items = {}//利用js的对象存储
+        this.count = 0//count属性来记录队列大小
+        this.firstCount = 0//用于追踪队列的第一个元素
+      }
+      //enqueue(element(s)): 向队列尾部添加一个(或多个)新的项。
+      enqueue(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      //dequeue(): 移除队列的第一项(即排在队列最前面的项)并返回被移除的元素。
+      dequeue() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        const result = this.items[this.firstCount]
+        delete this.items[this.firstCount]
+        this.firstCount++
+        return result
+      }
+      /* peek(): 返回队列中第一个元素---最先被添加，也将是最先被移除的元素。
+      队列不做任何变动(不移除元素，只返回元素信息 - 与stack类的 peek方法非常类似)。该方法在其他语言中也可以叫作front方法。 */
+      peek() {
+        if (this.isEmpty) {
+          return undefined
+        }
+        return this.items[this.firstCount]
+      }
+      //isEmpty(): 如果队列中不包含任何元素，返回true，否则返回false。
+      isEmpty() {
+        return this.count - this.firstCount === 0
+      }
+      //size(): 返回队列包含的元素个数，与数组的length 属性类似。
+      size() {
+        return this.count - this.firstCount
+      }
+      //clear(): 清空队列
+      clear() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[this.firstCount]}`
+        for (let i = this.firstCount + 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    function hotPotato(elementsList, num) {//elementsList:参与游戏的人员;num:传递次数
+      const queue = new Queue()
+      const elimitatedList = []//保存淘汰人员
+      for (let i = 0; i < elementsList.length; i++) {
+        queue.enqueue(elementsList[i])
+      }
+      while (queue.size() > 1) {
+        for (let i = 0; i < num; i++) {
+          queue.enqueue(queue.dequeue())
+        }
+        elimitatedList.push(queue.dequeue())
+      }
+      return {
+        elimitated: elimitatedList,
+        winner: queue.dequeue()
+      }
+    }
+    const names = ['John', 'Jack', 'Camila', 'Ingrid', 'Carl']
+    const result = hotPotato(names, 7)
+    result.elimitated.forEach(name => {
+      console.log(`${name}在击鼓传花游戏中被淘汰`)
+    })
+    console.log("胜利者:", result.winner)
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    class Deque {
+      constructor() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //addFront(element):该方法在双端队列前端添加新的元素
+      addFront(element) {
+        if (this.isEmpty()) {
+          addBack(element)
+        } else if (this.firstCount > 0) {
+          this.firstCount--
+          this.items[this.firstCount] = element
+        } else {
+          for (let i = this.count; i > 0; i--) {
+            this.items[i] = this.items[i - 1]
+          }
+          this.count++
+          this.firstCount = 0
+          this.items[0] = element
+        }
+      }
+      //addBack(element):该方法在双端队列后端添加新的元素(实现方法和Queue类中的enqueue方法相同)
+      addBack(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      //removeFront():该方法会从双端队列前端移除第一个元素(实现方法和Queue类中的dequeue方法相同)
+      removeFront() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        let result = this.items[this.firstCount]
+        delete this.items[this.firstCount]
+        this.firstCount++
+        return result
+      }
+      //removeBack():该方法会从双端队列后端移除第一个元素(实现方法和Stack类中的pop 方法一样)
+      removeBack() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result
+      }
+      //peekFront():该方法返回双端队列前端的第一个元素(实现方法和 Queue类中的 peek方法一样)
+      peekFront() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.firstCount]
+      }
+      //peekBack():该方法返回双端队列后端的第一个元素(实现方法和 Stack类中的 peek方法一样)
+      peekBack() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      }
+      isEmpty() {
+
+        return this.count - this.firstCount === 0
+      }
+      //size(): 返回队列包含的元素个数，与数组的length 属性类似
+      size() {
+        return this.count - this.firstCount
+      }
+      //clear(): 清空队列
+      clear() {
+        this.items = {}
+        this.count = 0
+        this.firstCount = 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[this.firstCount]}`
+        for (let i = this.firstCount + 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    function palindromeChecker(aString) {
+      if (aString === undefined || aString === null || aString != null && aString === 0) {
+        return false
+      }
+      const deque = new Deque()
+      const lowerString = aString.toLocaleLowerCase().split(" ").join('')
+      let isEqual = true
+      let firstChar, lastChar
+      for (let i = 0; i < lowerString.length; i++) {
+        deque.addBack(lowerString.charAt(i))
+      }
+      while (deque.size() > 1 && isEqual) {
+        firstChar = deque.removeFront()
+        lastChar = deque.removeBack()
+        if (firstChar != lastChar) {
+          isEqual = false
+        }
+      }
+      return isEqual
+    }
+    console.log('a', palindromeChecker('a'))
+    console.log('aa', palindromeChecker('aa'))
+    console.log('kayak', palindromeChecker('kayak'))
+    console.log('Was it a car or a cat I saw', palindromeChecker('Was it a car or a cat I saw'))
+  </script>
+</body>
+
+</html>

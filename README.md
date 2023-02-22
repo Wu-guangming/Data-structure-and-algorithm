@@ -780,4 +780,68 @@ js创建deque并使用
   </script>
 ```
 
-案例
+***案例(击鼓传花游戏)***
+
+其中队列构造使用之前构造的Queue类(这里省略,实际运行时要加上)
+
+注意:当此轮淘汰一人后,下一轮由此次淘汰人员的下一位开始传递
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230222142214561.png" alt="image-20230222142214561" style="zoom: 67%;" />
+
+```
+function hotPotato(elementsList, num) {//elementsList:参与游戏的人员;num:传递次数
+      const queue = new Queue()
+      const elimitatedList = []//保存淘汰人员
+      for (let i = 0; i < elementsList.length; i++) {
+        queue.enqueue(elementsList[i])
+      }
+      while (queue.size() > 1) {
+        for (let i = 0; i < num; i++) {
+          queue.enqueue(queue.dequeue())
+        }
+        elimitatedList.push(queue.dequeue())
+      }
+      return {
+        elimitated: elimitatedList,
+        winner: queue.dequeue()
+      }
+    }
+    const names = ['John', 'Jack', 'Camila', 'Ingrid', 'Carl']
+    const result = hotPotato(names, 7)
+    result.elimitated.forEach(name => {
+      console.log(`${name}在击鼓传花游戏中被淘汰`)
+    })
+    console.log("胜利者:", result.winner)
+```
+
+***案例(回文检查器)***
+
+注意:回文是指正反都能读通的单词,词组,数或一系列字符的序列;如 madam 或 racecar
+
+```
+function palindromeChecker(aString) {
+      if (aString === undefined || aString === null || aString != null && aString === 0) {
+        return false
+      }
+      const deque = new Deque()
+      const lowerString = aString.toLocaleLowerCase().split(" ").join('')
+      let isEqual = true
+      let firstChar, lastChar
+      for (let i = 0; i < lowerString.length; i++) {
+        deque.addBack(lowerString.charAt(i))
+      }
+      while (deque.size() > 1 && isEqual) {
+        firstChar = deque.removeFront()
+        lastChar = deque.removeBack()
+        if (firstChar != lastChar) {
+          isEqual = false
+        }
+      }
+      return isEqual
+    }
+    console.log('a', palindromeChecker('a'))
+    console.log('aa', palindromeChecker('aa'))
+    console.log('kayak', palindromeChecker('kayak'))
+    console.log('Was it a car or a cat I saw', palindromeChecker('Was it a car or a cat I saw'))
+```
+
