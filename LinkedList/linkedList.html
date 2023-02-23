@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function defaultEquals(a, b) {
+      return a === b
+    }
+    class LinkedList {
+      constructor(equalsFn = defaultEquals) {
+        this.count = 0
+        this.head = undefined
+        this.equalsFn = equalsFn
+      }
+      //比较链表中的元素是否相等
+      equalsFn(a, b) {
+        return a === b
+      }
+      //push(element):向链表尾部添加一个新元素
+      push(element) {
+        const node = new Node(element)
+        let current
+        if (this.head == null) {
+          this.head = node
+        } else {
+          current = this.head
+          while (current.next != null) {
+            current = current.next
+          }
+          current.next = node
+        }
+        this.count++
+      }
+      //insert(element,position):向链表特定位置插入一个新元素
+      insert(element, position) {
+        if (position >= 0 && position < this.count) {
+          const node = new Node(element)
+          if (position === 0) {
+            const current = this.head
+            node.next = current
+            this.head = node
+          } else {
+            const previous = this.getElementAt(position - 1)
+            const current = previous.next
+            node.next = current
+            previous.next = node
+          }
+          this.count++
+          return true
+        }
+        return false
+      }
+      //getElementAt(position):返回链表中特定位置的元素,如果不存在该元素则返回undefined
+      getElementAt(position) {
+        if (position >= 0 && position < this.count) {
+          let node = this.head
+          for (let i = 0; i < position && node != null; i++) {
+            node = node.next
+          }
+          return node
+        }
+        return undefined
+      }
+      //remove(element):从链表中移除一个元素
+      remove(element) {
+        const position = this.indexOf(element)
+        return this.removeAt(position)
+      }
+      //indexOf(element):返回元素在链表中的索引,如果链表中没有该元素则返回-1
+      indexOf(element) {
+        let current = this.head
+        for (let i = 0; i < this.count && current != null; i++) {
+          if (this.equalsFn(element, current.element)) {
+            return i
+          }
+          current = current.next
+        }
+        return -1
+      }
+      //removeAt(position):移除链表中特定位置的元素,并将其返回
+      removeAt(position) {
+        if (position >= 0 && position < this.count) {
+          let current = this.head
+          if (position === 0) {
+            this.head = current.next
+          } else {
+            let previous = this.getElementAt(position - 1)
+            current = previous.next
+            previous.next = current.next
+          }
+          this.count--
+          return current.element
+        }
+        return undefined
+      }
+      //isEmpty():如果链表不包含任何元素返回true;如果链表长度大于0返回false
+      isEmpty() {
+        return this.size() === 0
+      }
+      //size():返回链表中的元素个数
+      size() {
+        return this.count
+      }
+      //toString():返回整个链表的字符串
+      toString() {
+        if (this.head == null) {
+          return ''
+        }
+        let objString = `${this.head.element}`
+        let current = this.head.next
+        for (let i = 0; i < this.count && current != null; i++) {
+          objString = `${objString},${current.element}`
+          current = current.next
+        }
+        return objString
+      }
+    }
+    class Node {
+      constructor(element) {
+        this.element = element
+        this.next = undefined
+      }
+    }
+    const list = new LinkedList()
+    console.log(list.isEmpty())//true
+    list.push(15)
+    list.push(10)
+    console.log(list.toString())//15,10
+    list.insert(20, 1)
+    console.log(list.toString())//15,20,10
+    list.remove(10)
+    console.log(list.toString())//15,20
+    list.push(25)
+    list.insert(99, 2)
+    console.log(list.size())//4
+    console.log(list.toString())//15,20,99,25
+  </script>
+</body>
+
+</html>

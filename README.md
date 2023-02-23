@@ -385,9 +385,263 @@
 
 线性表是n个具有相同特性的元素的有限序列
 
-分为顺序表和链表
+## 链表(LinkedList)
 
-# 栈(Stack)
+链表不同于数组,链表中的元素在内存中不是连续放置的,每个元素由一个存储该元素本身的节点和一个指向下一个元素的引用(指针)组成;如下图
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230223145822953.png" alt="image-20230223145822953" style="zoom:80%;" />
+
+链表的好处在于我们在添加和删除元素是不需要移动其他元素;但是链表需要使用指针,即我们可以使用指针访问链表任意元素,但若想访问链表中间的元素则需要从头开始遍历每一个元素直到遍历到所查找的元素
+
+**js创建链表及其方法代码:**
+
+//push(element):向链表尾部添加一个新元素
+
+//insert(element,position):向链表特定位置插入一个新元素
+
+//getElementAt(position):返回链表中特定位置的元素,如果不存在该元素则返回undefined
+
+//remove(element):从链表中移除一个元素
+
+//indexOf(element):返回元素在链表中的索引,如果链表中没有该元素则返回-1
+
+//removeAt(position):移除链表中特定位置的元素,并将其返回
+
+//isEmpty():如果链表不包含任何元素返回true;如果链表长度大于0返回false
+
+//size():返回链表中的元素个数
+
+//toString():返回整个链表的字符串
+
+```
+<script>
+    function defaultEquals(a, b) {
+      return a === b
+    }
+    class LinkedList {
+      constructor(equalsFn = defaultEquals) {
+        this.count = 0
+        this.head = undefined
+        this.equalsFn = equalsFn
+      }
+      //比较链表中的元素是否相等
+      equalsFn(a, b) {
+        return a === b
+      }
+      //push(element):向链表尾部添加一个新元素
+      push(element) {
+        const node = new Node(element)
+        let current
+        if (this.head == null) {
+          this.head = node
+        } else {
+          current = this.head
+          while (current.next != null) {
+            current = current.next
+          }
+          current.next = node
+        }
+        this.count++
+      }
+      //insert(element,position):向链表特定位置插入一个新元素
+      insert(element, position) {
+        if (position >= 0 && position < this.count) {
+          const node = new Node(element)
+          if (position === 0) {
+            const current = this.head
+            node.next = current
+            this.head = node
+          } else {
+            const previous = this.getElementAt(position - 1)
+            const current = previous.next
+            node.next = current
+            previous.next = node
+          }
+          this.count++
+          return true
+        }
+        return false
+      }
+      //getElementAt(position):返回链表中特定位置的元素,如果不存在该元素则返回undefined
+      getElementAt(position) {
+        if (position >= 0 && position < this.count) {
+          let node = this.head
+          for (let i = 0; i < position && node != null; i++) {
+            node = node.next
+          }
+          return node
+        }
+        return undefined
+      }
+      //remove(element):从链表中移除一个元素
+      remove(element) {
+        const position = this.indexOf(element)
+        return this.removeAt(position)
+      }
+      //indexOf(element):返回元素在链表中的索引,如果链表中没有该元素则返回-1
+      indexOf(element) {
+        let current = this.head
+        for (let i = 0; i < this.count && current != null; i++) {
+          if (this.equalsFn(element, current.element)) {
+            return i
+          }
+          current = current.next
+        }
+        return -1
+      }
+      //removeAt(position):移除链表中特定位置的元素,并将其返回
+      removeAt(position) {
+        if (position >= 0 && position < this.count) {
+          let current = this.head
+          if (position === 0) {
+            this.head = current.next
+          } else {
+            let previous = this.getElementAt(position - 1)
+            current = previous.next
+            previous.next = current.next
+          }
+          this.count--
+          return current.element
+        }
+        return undefined
+      }
+      //isEmpty():如果链表不包含任何元素返回true;如果链表长度大于0返回false
+      isEmpty() {
+        return this.size() === 0
+      }
+      //size():返回链表中的元素个数
+      size() {
+        return this.count
+      }
+      //toString():返回整个链表的字符串
+      toString() {
+        if (this.head == null) {
+          return ''
+        }
+        let objString = `${this.head.element}`
+        let current = this.head.next
+        for (let i = 0; i < this.count && current != null; i++) {
+          objString = `${objString},${current.element}`
+          current = current.next
+        }
+        return objString
+      }
+    }
+    class Node {
+      constructor(element) {
+        this.element = element
+        this.next = undefined
+      }
+    }
+    const list = new LinkedList()
+    console.log(list.isEmpty())//true
+    list.push(15)
+    list.push(10)
+    console.log(list.toString())//15,10
+    list.insert(20, 1)
+    console.log(list.toString())//15,20,10
+    list.remove(10)
+    console.log(list.toString())//15,20
+    list.push(25)
+    list.insert(99, 2)
+    console.log(list.size())//4
+    console.log(list.toString())//15,20,99,25
+  </script>
+```
+
+## 双向链表(DoublyLinkedList)
+
+在链表中,一个节点只有链向下一个节点的链接;在双向链表中,链接是双向的,一个链向下一元素,另一个链向前一个元素
+
+代码实现
+
+```
+class DoublyNode extends Node {
+      constructor(element, next, prev) {
+        super(element, next)
+        this.prev = prev
+      }
+    }
+    class DoublyLinkedList extends LinkedList {
+      constructor(equalsFn = defaultEquals) {
+        super(equalsFn)
+        this.tail = undefined
+      }
+      insert(element, position) {
+        if (position >= 0 && position < this.count) {
+          const node = new DoublyNode(element)
+          let current = this.head
+          if (position === 0) {
+            if (this.head == null) {
+              this.head = node
+              this.tail = node
+            } else {
+              node.next = this.head
+              current.prev = node
+              this.head = node
+            }
+          } else if (position === this.count) {
+            current = this.tail
+            current.next = node
+            node.prev = current
+            this.tail = node
+          } else {
+            const previous = this.getElementAt(position - 1)
+            current = previous.next
+            node.next = current
+            previous.next = node
+            current.prev = node
+            node.prev = previous
+          }
+          this.count++
+          return true
+        }
+        return false
+      }
+      removeAt(position) {
+        if (position >= 0 && position < this.count) {
+          let current = this.head
+          if (position === 0) {
+            this.head = current.next
+            if (this.count === 1) {
+              this.tail = undefined
+            } else {
+              this.head.prev = undefined
+            }
+          } else if (position === this.count - 1) {
+            current = this.tail
+            this.tail = current.prev
+            this.tail.next = undefined
+          } else {
+            let current = this.getElementAt(position)
+            const previous = current.prev
+            previous.next = current.next
+            current.next.prev = previous
+          }
+          this.count--
+          return current.element
+        }
+        return undefined
+      }
+    }
+    const doublylist = new DoublyLinkedList()
+    console.log(doublylist.isEmpty())//true
+    doublylist.push(15)
+    doublylist.push(10)
+    console.log(doublylist.toString())//15,10
+    doublylist.insert(20, 1)
+    console.log(doublylist.toString())//15,20,10
+    doublylist.removeAt(0)//此处有个小bug,删除最后一个元素时会报错,目前还未找到原因
+    console.log(doublylist.toString())//15,20
+    doublylist.push(25)
+    doublylist.insert(99, 2)
+    console.log(doublylist.size())//4
+    console.log(doublylist.toString())//15,20,99,25
+```
+
+
+
+# 栈(Stayck)
 
 栈是一种遵循***后进先出(LIFO)***原则的有序集合,在栈里新元素都靠近栈顶,旧元素都靠近栈底.
 
