@@ -639,9 +639,122 @@ class DoublyNode extends Node {
     console.log(doublylist.toString())//15,20,99,25
 ```
 
+## 循环链表(CircularLinkedList)
+
+循环链表可以像链表一样只有单向引用;也可以向双向链表一样有双向引用;
+
+循环链表和链表的区别在于它最后一个元素指向下一个元素的指针(tail.next)不是引用undefined,而是指向第一个元素head
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230224101119483.png" alt="image-20230224101119483" style="zoom:80%;" />
+
+双向循环链表有指向head元素的tail.next和指向tail元素的head.prev
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230224101311757.png" alt="image-20230224101311757" style="zoom:80%;" />
+
+代码实现:(**补充说明:下列重写方法只是测试需要写了部分,并未将链表的方法全部重写,可按自己需求进行重写**)
+
+```
+class CircularLinkedList extends LinkedList {
+      constructor(equalsFn = defaultEquals) {
+        super(equalsFn)
+      }
+      //重写toString方法
+      toString() {
+        if (this.head == null) {
+          return ''
+        }
+        let objString = `${this.head.element}`
+        let current = this.head.next
+        for (let i = 0; i < this.count - 1 && current != null; i++) {
+          objString = `${objString},${current.element}`
+          current = current.next
+        }
+        return objString
+      }
+      //重写push方法
+      push(element) {
+        const node = new Node(element)
+        let current
+        if (this.head == null) {
+          this.head = node
+          node.next = this.head
+        } else {
+          current = this.head
+          node.next = this.head
+          current = this.getElementAt(this.count - 1)
+          current.next = node
+        }
+        this.count++
+      }
+      //重写insert方法
+      insert(element, position) {
+        if (position >= 0 && position < this.count) {
+          const node = new Node(element)
+          let current = this.head
+          if (position === 0) {
+            if (this.count == null) {
+              this.head = node
+              node.next = this.head
+            } else {
+              node.next = this.head
+              current = this.getElementAt(this.count - 1)
+              current.next = node
+              this.head = node
+            }
+          } else {
+            const previous = this.getElementAt(position - 1)
+            node.next = previous.next
+            previous.next = node
+          }
+          this.count++
+          return true
+        }
+        return false
+      }
+      //重写removeAt方法
+      removeAt(position) {
+        if (position >= 0 && position < this.count) {
+          let current = this.head
+          if (position === 0) {
+            if (this.count === 1) {
+              this.head = undefined
+            } else {
+              let removed = this.head
+              current = this.getElementAt(this.count - 1)
+              //console.log(current)
+              this.head = this.head.next
+              current.next = this.head
+              current = removed
+            }
+          } else {
+            const previous = this.getElementAt(position - 1)
+            current = previous.next
+            previous.next = current.next
+          }
+          this.count--
+          return current.element
+        }
+        return undefined
+      }
+    }
+    const circularlist = new CircularLinkedList()
+    console.log(circularlist.isEmpty())//true
+    circularlist.push(15)
+    circularlist.push(10)
+    console.log(circularlist.toString())//15,10
+    circularlist.insert(20, 0)
+    console.log(circularlist.toString())//20,15,10
+    circularlist.removeAt(0)
+    console.log(circularlist.toString())//15,10
+    circularlist.push(25)
+    circularlist.insert(99, 1)
+    console.log(circularlist.size())//4
+    console.log(circularlist.toString())//15,99,10,25
+```
 
 
-# 栈(Stayck)
+
+# 栈(Stack)
 
 栈是一种遵循***后进先出(LIFO)***原则的有序集合,在栈里新元素都靠近栈顶,旧元素都靠近栈底.
 

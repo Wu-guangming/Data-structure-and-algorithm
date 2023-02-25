@@ -9,7 +9,6 @@
 </head>
 
 <body>
-
   <script>
     function defaultEquals(a, b) {
       return a === b
@@ -21,9 +20,9 @@
         this.equalsFn = equalsFn
       }
       //比较链表中的元素是否相等
-      /* equalsFn(a, b) {
+      equalsFn(a, b) {
         return a === b
-      } */
+      }
       //push(element):向链表尾部添加一个新元素
       push(element) {
         const node = new Node(element)
@@ -129,68 +128,82 @@
         this.next = undefined
       }
     }
-    class DoublyNode extends Node {
-      constructor(element, next, prev) {
-        super(element, next)
-        this.prev = prev
-      }
-    }
-    class DoublyLinkedList extends LinkedList {
+    class CircularLinkedList extends LinkedList {
       constructor(equalsFn = defaultEquals) {
         super(equalsFn)
-        this.tail = undefined
       }
+      //重写toString方法
+      toString() {
+        if (this.head == null) {
+          return ''
+        }
+        let objString = `${this.head.element}`
+        let current = this.head.next
+        for (let i = 0; i < this.count - 1 && current != null; i++) {
+          objString = `${objString},${current.element}`
+          current = current.next
+        }
+        return objString
+      }
+      //重写push方法
+      push(element) {
+        const node = new Node(element)
+        let current
+        if (this.head == null) {
+          this.head = node
+          node.next = this.head
+        } else {
+          current = this.head
+          node.next = this.head
+          current = this.getElementAt(this.count - 1)
+          current.next = node
+        }
+        this.count++
+      }
+      //重写insert方法
       insert(element, position) {
         if (position >= 0 && position < this.count) {
-          const node = new DoublyNode(element)
+          const node = new Node(element)
           let current = this.head
           if (position === 0) {
-            if (this.head == null) {
+            if (this.count == null) {
               this.head = node
-              this.tail = node
+              node.next = this.head
             } else {
               node.next = this.head
-              current.prev = node
+              current = this.getElementAt(this.count - 1)
+              current.next = node
               this.head = node
             }
-          } else if (position === this.count) {
-            current = this.tail
-            current.next = node
-            node.prev = current
-            this.tail = node
           } else {
             const previous = this.getElementAt(position - 1)
-            current = previous.next
-            node.next = current
+            node.next = previous.next
             previous.next = node
-            current.prev = node
-            node.prev = previous
           }
           this.count++
           return true
         }
         return false
       }
+      //重写removeAt方法
       removeAt(position) {
         if (position >= 0 && position < this.count) {
           let current = this.head
           if (position === 0) {
-            this.head = current.next
             if (this.count === 1) {
-              this.tail = undefined
+              this.head = undefined
             } else {
-              this.head.prev = undefined
+              let removed = this.head
+              current = this.getElementAt(this.count - 1)
+              //console.log(current)
+              this.head = this.head.next
+              current.next = this.head
+              current = removed
             }
-          } else if (position === this.count - 1) {
-            current = this.tail
-            console.log(current)
-            this.tail = current.prev
-            this.tail.next = undefined
           } else {
-            let current = this.getElementAt(position)
-            const previous = current.prev
+            const previous = this.getElementAt(position - 1)
+            current = previous.next
             previous.next = current.next
-            current.next.prev = previous
           }
           this.count--
           return current.element
@@ -198,19 +211,19 @@
         return undefined
       }
     }
-    const doublylist = new DoublyLinkedList()
-    console.log(doublylist.isEmpty())//true
-    doublylist.push(15)
-    doublylist.push(10)
-    console.log(doublylist.toString())//15,10
-    doublylist.insert(20, 1)
-    console.log(doublylist.toString())//15,20,10
-    doublylist.removeAt(2)//此处有个小bug,删除最后一个元素时会报错,目前还未找到原因
-    console.log(doublylist.toString())//15,20
-    doublylist.push(25)
-    doublylist.insert(99, 2)
-    console.log(doublylist.size())//4
-    console.log(doublylist.toString())//15,20,99,25
+    const circularlist = new CircularLinkedList()
+    console.log(circularlist.isEmpty())//true
+    circularlist.push(15)
+    circularlist.push(10)
+    console.log(circularlist.toString())//15,10
+    circularlist.insert(20, 0)
+    console.log(circularlist.toString())//20,15,10
+    circularlist.removeAt(0)
+    console.log(circularlist.toString())//15,10
+    circularlist.push(25)
+    circularlist.insert(99, 1)
+    console.log(circularlist.size())//4
+    console.log(circularlist.toString())//15,99,10,25
   </script>
 </body>
 
