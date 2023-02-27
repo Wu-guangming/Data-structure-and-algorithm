@@ -1319,3 +1319,226 @@ function palindromeChecker(aString) {
     console.log('Was it a car or a cat I saw', palindromeChecker('Was it a car or a cat I saw'))
 ```
 
+# 集合(Set)
+
+集合是由一组无序的且唯一的(即不能重复的)项组成的
+
+**代码实现**:
+
+(ES6新增了Set,我们可直接使用Set及其方法;下列代码只是模拟Set类的构造及其部分方法)
+
+```
+<script>
+    class Set {
+      constructor() {
+        this.items = {}
+      }
+      //add(element):向集合中添加一个元素
+      add(element) {
+        if (!this.has(element)) {
+          this.items[element] = element
+          return true
+        }
+        return false
+      }
+      //delete(element):从集合中移除一个元素
+      delete(element) {
+        if (this.has(element)) {
+          delete this.items[element]
+          return true
+        }
+        return false
+      }
+      //has(element):如果元素在集合中返回true;如果不在返回false
+      has(element) {
+        return Object.prototype.hasOwnProperty.call(this.items, element)
+      }
+      //clear():移除集合中的所有元素
+      clear() {
+        return items = {}
+      }
+      //size():返回集合中所包含的元素个数,和length类似
+      size() {
+        return Object.keys(this.items).length
+      }
+      //values():返回一个包含集合中所有值的数组
+      values() {
+        return Object.values(this.items)
+      }
+    }
+    const set = new Set()
+    set.add(1)
+    console.log(set.values())//true
+    console.log(set.has(1))//[1]
+    console.log(set.size())//1
+    set.add(2)
+    console.log(set.values())//[1,2]
+    console.log(set.has(2))//true
+    console.log(set.size())//2
+    set.delete(1)
+    console.log(set.values())//[2]
+    set.delete(2)
+    console.log(set.values())//[]
+  </script>
+```
+
+下面是ES6中的Set类,和我们模拟的set类有所不同
+
+```
+const set = new Set()
+    set.add(1)
+    set.add(2)
+    console.log(set.values())//SetIterator {1, 2}
+    console.log(set.has(1))//true
+    console.log(set.size)//2
+    set.delete(1)
+    console.log(set.values())//SetIterator {2}
+```
+
+
+
+## 集合运算
+
+并集:对于给定的两个集合,返回一个包含两个集合中所有元素的新集合
+
+交集:对于给定的两个集合,返回一个包含两个集合中共有元素的新集合
+
+差集:对于给定的两个集合,返回一个包含所有元素存在于第一个集合但不存在于第二个集合的新集合
+
+子集:验证一个给定集合是否是另一个集合的子集
+
+**代码实现**:(在之前模拟构造的Set类中新增加了4个方法
+
+union(otherSet),
+
+interSection(otherSet),
+
+difference(otherSet),
+
+isSubsetOf(otherSet))
+
+```
+<script>
+    class Set {
+      constructor() {
+        this.items = {}
+      }
+      //add(element):向集合中添加一个元素
+      add(element) {
+        if (!this.has(element)) {
+          this.items[element] = element
+          return true
+        }
+        return false
+      }
+      //delete(element):从集合中移除一个元素
+      delete(element) {
+        if (this.has(element)) {
+          delete this.items[element]
+          return true
+        }
+        return false
+      }
+      //has(element):如果元素在集合中返回true;如果不在返回false
+      has(element) {
+        return Object.prototype.hasOwnProperty.call(this.items, element)
+      }
+      //clear():移除集合中的所有元素
+      clear() {
+        return items = {}
+      }
+      //size():返回集合中所包含的元素个数,和length类似
+      size() {
+        return Object.keys(this.items).length
+      }
+      //values():返回一个包含集合中所有值的数组
+      values() {
+        return Object.values(this.items)
+      }
+      //union(otherSet):并集
+      union(otherSet) {
+        const unionSet = new Set()
+        this.values().forEach(value => unionSet.add(value))
+        otherSet.values().forEach(value => unionSet.add(value))
+        return unionSet
+      }
+      //interSection(otherSet):交集
+      interSection(otherSet) {
+        const interSectionSet = new Set()
+        const values = this.values()
+        for (let i = 0; i < values.length; i++) {
+          if (otherSet.has(values[i])) {
+            interSectionSet.add(values[i])
+          }
+        }
+        return interSectionSet
+      }
+      //difference(otherSet):差集(例如setA.difference(setB)的结果是存在于setA中却不存在于setB中的元素)
+      difference(otherSet) {
+        const differenceSet = new Set()
+        const values = this.values()
+        values.forEach(value => {
+          if (!otherSet.has(value)) {
+            differenceSet.add(value)
+          }
+        })
+        return differenceSet
+      }
+      //isSubsetOf(otherSet):子集(setA.isSubsetOf(setB)验证setA是否是setB的子集)
+      isSubsetOf(otherSet) {
+        if (this.size() > otherSet.size()) {
+          return false
+        }
+        let isSubset = true
+        this.values().every(value => {
+          if (!otherSet.has(value)) {
+            isSubset = false
+            return false
+          }
+          return true
+        })
+        return isSubset
+      }
+    }
+    const setA = new Set()
+    setA.add(1)
+    setA.add(2)
+    setA.add(3)
+    const setB = new Set()
+    setB.add(3)
+    setB.add(4)
+    setB.add(5)
+    setB.add(6)
+    const setC = new Set()
+    setC.add(3)
+    setC.add(5)
+    const unionSetAB = setA.union(setB)
+    const interSectionSetAB = setA.interSection(setB)
+    const differenceSetAB = setA.difference(setB)
+    console.log(unionSetAB.values())
+    console.log(interSectionSetAB.values())
+    console.log(differenceSetAB.values())
+    console.log(setC.isSubsetOf(setB))
+  </script>
+```
+
+使用扩展运算符模拟集合运算
+
+```
+const setA = new Set()
+    setA.add(1)
+    setA.add(2)
+    setA.add(3)
+    const setB = new Set()
+    setB.add(3)
+    setB.add(4)
+    setB.add(5)
+    setB.add(6)
+    //模拟并集
+    console.log(new Set([...setA, ...setB]))//Set(6) {1, 2, 3, 4, 5, 6}
+    //模拟交集
+    console.log(new Set([...setA].filter(x => setB.has(x))))//Set(1) {3}
+    //模拟差集
+    console.log(new Set([...setA].filter(x => !setB.has(x))))//Set(2) {1, 2}
+```
+

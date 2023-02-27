@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    class Set {
+      constructor() {
+        this.items = {}
+      }
+      //add(element):向集合中添加一个元素
+      add(element) {
+        if (!this.has(element)) {
+          this.items[element] = element
+          return true
+        }
+        return false
+      }
+      //delete(element):从集合中移除一个元素
+      delete(element) {
+        if (this.has(element)) {
+          delete this.items[element]
+          return true
+        }
+        return false
+      }
+      //has(element):如果元素在集合中返回true;如果不在返回false
+      has(element) {
+        return Object.prototype.hasOwnProperty.call(this.items, element)
+      }
+      //clear():移除集合中的所有元素
+      clear() {
+        return items = {}
+      }
+      //size():返回集合中所包含的元素个数,和length类似
+      size() {
+        return Object.keys(this.items).length
+      }
+      //values():返回一个包含集合中所有值的数组
+      values() {
+        return Object.values(this.items)
+      }
+      //union(otherSet):并集
+      union(otherSet) {
+        const unionSet = new Set()
+        this.values().forEach(value => unionSet.add(value))
+        otherSet.values().forEach(value => unionSet.add(value))
+        return unionSet
+      }
+      //interSection(otherSet):交集
+      interSection(otherSet) {
+        const interSectionSet = new Set()
+        const values = this.values()
+        for (let i = 0; i < values.length; i++) {
+          if (otherSet.has(values[i])) {
+            interSectionSet.add(values[i])
+          }
+        }
+        return interSectionSet
+      }
+      //difference(otherSet):差集(例如setA.difference(setB)的结果是存在于setA中却不存在于setB中的元素)
+      difference(otherSet) {
+        const differenceSet = new Set()
+        const values = this.values()
+        values.forEach(value => {
+          if (!otherSet.has(value)) {
+            differenceSet.add(value)
+          }
+        })
+        return differenceSet
+      }
+      //isSubsetOf(otherSet):子集(setA.isSubsetOf(setB)验证setA是否是setB的子集)
+      isSubsetOf(otherSet) {
+        if (this.size() > otherSet.size()) {
+          return false
+        }
+        let isSubset = true
+        this.values().every(value => {
+          if (!otherSet.has(value)) {
+            isSubset = false
+            return false
+          }
+          return true
+        })
+        return isSubset
+      }
+    }
+    const setA = new Set()
+    setA.add(1)
+    setA.add(2)
+    setA.add(3)
+    const setB = new Set()
+    setB.add(3)
+    setB.add(4)
+    setB.add(5)
+    setB.add(6)
+    const setC = new Set()
+    setC.add(3)
+    setC.add(5)
+    const unionSetAB = setA.union(setB)
+    const interSectionSetAB = setA.interSection(setB)
+    const differenceSetAB = setA.difference(setB)
+    console.log(unionSetAB.values())
+    console.log(interSectionSetAB.values())
+    console.log(differenceSetAB.values())
+    console.log(setC.isSubsetOf(setB))
+  </script>
+</body>
+
+</html>
