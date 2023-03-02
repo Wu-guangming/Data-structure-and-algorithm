@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class HashTable {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //创建散列函数
+      loseloseHashCode(key) {
+        if (typeof key === 'number') {
+          return key
+        }
+        const tableKey = this.toStrFn(key)
+        let hash = 0
+        for (let i = 0; i < tableKey.length; i++) {
+          hash += tableKey.charCodeAt(i)
+        }
+        return hash % 37
+      }
+      hashCode(key) {
+        return this.loseloseHashCode(key)
+      }
+      //put(key,value):向散列表增加一个新的项
+      put(key, value) {
+        if (key !== null && value !== null) {
+          const position = this.hashCode(key)
+          this.table[position] = new ValuePair(key, value)
+          return true
+        }
+        return false
+      }
+      //remove(key):根据键值从散列表中移除
+      remove(key) {
+        const hash = this.hashCode(key)
+        const valuePair = this.table[hash]
+        if (valuePair !== null) {
+          delete this.table[hash]
+          return true
+        }
+        return false
+      }
+      //get(key):返回根据键值检索到的特定的值
+      get(key) {
+        const valuePair = this.table[this.hashCode(key)]
+        return valuePair == null ? undefined : valuePair.value
+      }
+      //
+      isEmpty() {
+        return this.size === 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const keys = Object.keys(this.table)
+        let objString = `${keys[0]}=>${this.table[keys[0]].toString()}`
+        for (let i = 1; i < keys.length; i++) {
+          objString = `${objString},\n${keys[i]}=>${this.table[keys[i]].toString()}`
+        }
+        return objString
+      }
+    }
+    const hash = new HashTable()
+    hash.put('Ygritte', 'Ygritte@email.com')
+    hash.put('Jonathan', 'Jonathan@email.com')
+    hash.put('Jamie', 'Jamie@email.com')
+    hash.put('Jack', 'Jack@email.com')
+    hash.put('Jasmine', 'Jasmine@email.com')
+    hash.put('Jake', 'Jake@email.com')
+    hash.put('Nathan', 'Nathan@email.com')
+    hash.put('Athelstan', 'athelstan@email.com')
+    hash.put('Sue', 'Sue@email.com')
+    hash.put('Aethelwulf', 'aethelwulf@email.com')
+    hash.put('Sargeras', 'Sargeras@email.com')
+    console.log(hash.hashCode('Ygritte') + '-Ygritte')//4-Ygritte
+    console.log(hash.hashCode('Jonathan') + '-Jonathan')//5-Jonathan
+    console.log(hash.hashCode('Jamie') + '-Jamie')//5-Jamie
+    console.log(hash.hashCode('Jack') + '-Jack')//7-Jack
+    console.log(hash.hashCode('Jasmine') + '-Jasmine')//8-Jasmine
+    console.log(hash.hashCode('Jake') + '-Jake')//9-Jake
+    console.log(hash.hashCode('Nathan') + '-Nathan')//10-Nathan
+    console.log(hash.hashCode('Athelstan') + '-Athelstan')//7-Athelstan
+    console.log(hash.hashCode('Sue') + '-Sue')//5-Sue
+    console.log(hash.hashCode('Aethelwulf') + '-Aethelwulf')//5-Aethelwulf
+    console.log(hash.hashCode('Sargeras') + '-Sargeras')//10-Sargeras
+    console.log(hash.toString())
+  </script>
+</body>
+
+</html>

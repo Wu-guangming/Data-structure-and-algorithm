@@ -3,6 +3,10 @@
 
 数据结构与算法
 
+[TOC]
+
+
+
 # 排序
 
 ![image-20230220140533190](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230220140533190.png)
@@ -1541,4 +1545,440 @@ const setA = new Set()
     //模拟差集
     console.log(new Set([...setA].filter(x => !setB.has(x))))//Set(2) {1, 2}
 ```
+
+# 字典和散列表(Map类)
+
+集合是一组互不相同的元素,它是以[值,值]形式来存储元素;字典是以[键,值]对形式来存储元素
+
+## 字典(Map类)
+
+代码实现(以ES6中的Map类为基础)
+
+```
+<script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class Dictionary {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //set(key,value):像字典中添加新的键值对,如果键名已存在,那么其对应的值会被新值覆盖
+      set(key, value) {
+        if (key !== null && value !== null) {
+          const tableKey = this.toStrFn(key)
+          this.table[tableKey] = new ValuePair(key, value)
+          return true
+        }
+        return false
+      }
+      //remove(key):通过键值作为参数移除字典中对应的数据值
+      remove(key) {
+        if (this.hasKey(key)) {
+          delete this.table[this.toStrFn(key)]
+          return true
+        }
+        return false
+      }
+      //hasKey(key):如果某个键值存在于字典中,返回true,否则返回false
+      hasKey(key) {
+        return this.table[this.toStrFn(key)] !== null
+      }
+      //get(key):通过以键值作为参数查找特定数值并返回
+      get(key) {
+        const valuePair = this.table[this.toStrFn(key)]
+        return valuePair == null ? undefined : valuePair.value
+      }
+      //clear():删除该字典中的所有值
+      clear() {
+        this.table = {}
+      }
+      //size():返回字典中所包含的值的数量,和数组的length相似
+      size() {
+        return Object.keys(this.table).length
+      }
+      //isEmpty():size等于0时返回true,否则返回false
+      isEmpty() {
+        return this.size === 0
+      }
+      //keys():将字典所包含的键名以数组形式返回
+      keys() {
+        return this.keyValues().map(valuePair => valuePair.key)
+      }
+      //values():将字典所包含的值以数组形式返回
+      values() {
+        return this.keyValues().map(valuePair => valuePair.value)
+      }
+      //keyValues():将字典中的所有[键,值]对返回
+      keyValues() {
+        return Object.values(this.table)
+      }
+      //forEach(callbackFn):迭代字典中所有键值对,callbackFn两个参数key和value;该方法在回调函数返回值false终止
+      forEach(callbackFn) {
+        const valuePair = this.keyValues()
+        for (let i = 0; i < valuePair.length; i++) {
+          const result = callbackFn(valuePair[i].key, valuePair[i].value)
+          if (result === false) {
+            break
+          }
+        }
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const valuePair = this.keyValues()
+        let objString = `${valuePair[0].toString()}`
+        for (let i = 1; i < valuePair.length; i++) {
+          objString = `${objString},${valuePair[i].toString()}`
+        }
+        return objString
+      }
+    }
+    const dictionary = new Dictionary()
+    dictionary.set('Gandalf', 'gandalf@email.com')
+    dictionary.set('John', 'johnSnow@email.com')
+    dictionary.set('Tyrion', 'tyrion@email.com')
+    console.log(dictionary.hasKey('Gandalf'))//true
+    console.log(dictionary.size())//3
+    console.log(dictionary.keys())//['Gandalf', 'John', 'Tyrion']
+    console.log(dictionary.values())//['gandalf@email.com', 'johnSnow@email.com', 'tyrion@email.com']
+    console.log(dictionary.get('Tyrion'))//tyrion@email.com
+    dictionary.remove('John')
+    console.log(dictionary.keys())// ['Gandalf', 'Tyrion']
+    console.log(dictionary.values())//['gandalf@email.com', 'tyrion@email.com']
+    console.log(dictionary.keyValues())
+    //{key: 'Gandalf', value: 'gandalf@email.com'}
+    //{key: 'Tyrion', value: 'tyrion@email.com'}
+    dictionary.forEach((k, v) => {
+      console.log('forEach:', `key:${k},value:${v}`)
+    })
+    //forEach: key:Gandalf,value:gandalf@email.com
+    //forEach: key:Tyrion,value:tyrion@email.com
+  </script>
+```
+
+## 散列表(hashMap)
+
+散列算法的作用是尽可能地在数据结构中找到一个值;在之前的数据结构中如果想要获得一个值,就需要迭代整个数据结构,如果使用散列函数,就知道值的具体位置,因此能够快速检索到该值
+
+散列函数的作用是给定一个键值,然后返回只在表中的地址
+
+代码实现
+
+```
+  <script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class HashTable {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //创建散列函数
+      loseloseHashCode(key) {
+        if (typeof key === 'number') {
+          return key
+        }
+        const tableKey = this.toStrFn(key)
+        let hash = 0
+        for (let i = 0; i < tableKey.length; i++) {
+          hash += tableKey.charCodeAt(i)
+        }
+        return hash % 37
+      }
+      hashCode(key) {
+        return this.loseloseHashCode(key)
+      }
+      //put(key,value):向散列表增加一个新的项
+      put(key, value) {
+        if (key !== null && value !== null) {
+          const position = this.hashCode(key)
+          this.table[position] = new ValuePair(key, value)
+          return true
+        }
+        return false
+      }
+      //remove(key):根据键值从散列表中移除
+      remove(key) {
+        const hash = this.hashCode(key)
+        const valuePair = this.table[hash]
+        if (valuePair !== null) {
+          delete this.table[hash]
+          return true
+        }
+        return false
+      }
+      //get(key):返回根据键值检索到的特定的值
+      get(key) {
+        const valuePair = this.table[this.hashCode(key)]
+        return valuePair == null ? undefined : valuePair.value
+      }
+    }
+    const hash = new HashTable()
+    hash.put('Gandalf', 'gandalf@email.com')
+    hash.put('John', 'johnSnow@email.com')
+    hash.put('Tyrion', 'tyrion@email.com')
+    console.log(hash.hashCode('Gandalf') + '-Gandalf')//19-Gandalf
+    console.log(hash.hashCode('John') + '-John')//29-John
+    console.log(hash.hashCode('Tyrion') + '-Tyrion')//16-Tyrion
+    console.log(hash.get('Gandalf'))//gandalf@email.com
+    console.log(hash.get('Loiane'))//undefined
+    hash.remove('GanDalf')
+    console.log(hash.get('Gandalf'))//gandalf@email.com
+  </script>
+```
+
+## 处理散列表中的冲突
+
+有些时候某些键会有相同的散列值,不同的值在散列表中对应相同的位置的时候我们称其为冲突
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228142438027.png" alt="image-20230228142438027" style="zoom:80%;" />
+
+代码如下:
+
+```
+<script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class HashTable {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //创建散列函数
+      loseloseHashCode(key) {
+        if (typeof key === 'number') {
+          return key
+        }
+        const tableKey = this.toStrFn(key)
+        let hash = 0
+        for (let i = 0; i < tableKey.length; i++) {
+          hash += tableKey.charCodeAt(i)
+        }
+        return hash % 37
+      }
+      hashCode(key) {
+        return this.loseloseHashCode(key)
+      }
+      //put(key,value):向散列表增加一个新的项
+      put(key, value) {
+        if (key !== null && value !== null) {
+          const position = this.hashCode(key)
+          this.table[position] = new ValuePair(key, value)
+          return true
+        }
+        return false
+      }
+      //remove(key):根据键值从散列表中移除
+      remove(key) {
+        const hash = this.hashCode(key)
+        const valuePair = this.table[hash]
+        if (valuePair !== null) {
+          delete this.table[hash]
+          return true
+        }
+        return false
+      }
+      //get(key):返回根据键值检索到的特定的值
+      get(key) {
+        const valuePair = this.table[this.hashCode(key)]
+        return valuePair == null ? undefined : valuePair.value
+      }
+      //
+      isEmpty() {
+        return this.size === 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const keys = Object.keys(this.table)
+        let objString = `${keys[0]}=>${this.table[keys[0]].toString()}`
+        for (let i = 1; i < keys.length; i++) {
+          objString = `${objString},${keys[i]}=>${this.table[keys[i]].toString()}`
+        }
+        return objString
+      }
+    }
+    const hash = new HashTable()
+    hash.put('Ygritte', 'Ygritte@email.com')
+    hash.put('Jonathan', 'Jonathan@email.com')
+    hash.put('Jamie', 'Jamie@email.com')
+    hash.put('Jack', 'Jack@email.com')
+    hash.put('Jasmine', 'Jasmine@email.com')
+    hash.put('Jake', 'Jake@email.com')
+    hash.put('Nathan', 'Nathan@email.com')
+    hash.put('Athelstan', 'athelstan@email.com')
+    hash.put('Sue', 'Sue@email.com')
+    hash.put('Aethelwulf', 'aethelwulf@email.com')
+    hash.put('Sargeras', 'Sargeras@email.com')
+    console.log(hash.hashCode('Ygritte') + '-Ygritte')//4-Ygritte
+    console.log(hash.hashCode('Jonathan') + '-Jonathan')//5-Jonathan
+    console.log(hash.hashCode('Jamie') + '-Jamie')//5-Jamie
+    console.log(hash.hashCode('Jack') + '-Jack')//7-Jack
+    console.log(hash.hashCode('Jasmine') + '-Jasmine')//8-Jasmine
+    console.log(hash.hashCode('Jake') + '-Jake')//9-Jake
+    console.log(hash.hashCode('Nathan') + '-Nathan')//10-Nathan
+    console.log(hash.hashCode('Athelstan') + '-Athelstan')//7-Athelstan
+    console.log(hash.hashCode('Sue') + '-Sue')//5-Sue
+    console.log(hash.hashCode('Aethelwulf') + '-Aethelwulf')//5-Aethelwulf
+    console.log(hash.hashCode('Sargeras') + '-Sargeras')//10-Sargeras
+    console.log(hash.toString())
+  </script>
+```
+
+#### 解决方法1:**分离链接法**
+
+分离链接法包括为散列表的每一个位置创建一个链表并将元素存储在里面,它是解决冲突最简单的办法,但需要额外的空间
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228162031935.png" alt="image-20230228162031935" style="zoom:80%;" />
+
+代码实现(代码中需要用到之前的LinkedList数据结构,这里仅展示需要重写的put,remove,get方法)
+
+```
+put(key, value) {
+        if (key !== null && value !== null) {
+          const position = this.hashCode(key)
+          if (this.table[position] == null) {
+            this.table[position] = new LinkedList()
+          }
+          this.table[position].push(new ValuePair(key, value))
+          return true
+        }
+        return false
+      }
+      get(key) {
+        const position = this.hashCode(key)
+        const linkedList = this.table[position]
+        if (linkedList != null && !linkedList.isEmpty()) {
+          let current = linkedList.getHead()
+          while (current != null) {
+            if (current.element.key === key) {
+              return current.element.value
+            }
+            current = current.next
+          }
+        }
+        return undefined
+      }
+      remove(key) {
+        const position = this.hashCode(key)
+        const linkedList = this.table[position]
+        if (linkedList != null && !linkedList.isEmpty()) {
+          let current = linkedList.getHead()
+          while (current != null) {
+            if (current.element.key === key) {
+              linkedList.remove(current.element)
+              if (linkedList.isEmpty()) {
+                delete this.table[position]
+              }
+              return true
+            }
+            current = current.next
+          }
+        }
+        return false
+      }
+```
+
+测试代码及结果如图
+
+```
+const hash = new HashTableSeparateChaining()
+    hash.put('Ygritte', 'Ygritte@email.com')
+    hash.put('Jonathan', 'Jonathan@email.com')
+    hash.put('Jamie', 'Jamie@email.com')
+    hash.put('Jack', 'Jack@email.com')
+    hash.put('Jasmine', 'Jasmine@email.com')
+    hash.put('Jake', 'Jake@email.com')
+    hash.put('Nathan', 'Nathan@email.com')
+    hash.put('Athelstan', 'athelstan@email.com')
+    hash.put('Sue', 'Sue@email.com')
+    hash.put('Aethelwulf', 'aethelwulf@email.com')
+    hash.put('Sargeras', 'Sargeras@email.com')
+    console.log(hash.toString())
+    hash.remove('Aethelwulf')
+    hash.remove('Sargeras')
+    console.log(hash.toString())
+    console.log(hash.get('Sue'))
+```
+
+![image-20230228161537613](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228161537613.png)
+
+#### 解决方法2:**线性探查法**
+
+之所以叫线性,是因为它的处理方法是直接将数据存到表中,而不是在单独的数据结构中
+
+当你想往表中的某个位置添加一个新元素时,如果索引为position的位置已经被占用,就尝试position+1位置,如果该位置也被占据就尝试position+2位置,以此类推,直到找到一个空闲位置
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228162419668.png" alt="image-20230228162419668" style="zoom:80%;" />
+
+线性探查技术分两种
+
+第一种软删除方法,我们使用一个特殊值标记键值对被删除了,而不是真的删除它;经过一段时间后我们会得到一个有若干标记删除位置的散列表;这样会导致随时间的增加,散列表的效率逐渐降低
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228163323164.png" alt="image-20230228163323164" style="zoom:80%;" />
+
+第二种方法需检验有无必要将一个或多个元素移动到之前的位置
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230228163526479.png" alt="image-20230228163526479" style="zoom:80%;" />
+
+
 

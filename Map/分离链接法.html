@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function defaultEquals(a, b) {
+      return a === b
+    }
+    class LinkedList {
+      constructor(equalsFn = defaultEquals) {
+        this.count = 0
+        this.head = undefined
+        this.equalsFn = equalsFn
+      }
+      getHead() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.head
+      }
+      //比较链表中的元素是否相等
+      equalsFn(a, b) {
+        return a === b
+      }
+      //push(element):向链表尾部添加一个新元素
+      push(element) {
+        const node = new Node(element)
+        let current
+        if (this.head == null) {
+          this.head = node
+        } else {
+          current = this.head
+          while (current.next != null) {
+            current = current.next
+          }
+          current.next = node
+        }
+        this.count++
+      }
+      //insert(element,position):向链表特定位置插入一个新元素
+      insert(element, position) {
+        if (position >= 0 && position < this.count) {
+          const node = new Node(element)
+          if (position === 0) {
+            const current = this.head
+            node.next = current
+            this.head = node
+          } else {
+            const previous = this.getElementAt(position - 1)
+            const current = previous.next
+            node.next = current
+            previous.next = node
+          }
+          this.count++
+          return true
+        }
+        return false
+      }
+      //getElementAt(position):返回链表中特定位置的元素,如果不存在该元素则返回undefined
+      getElementAt(position) {
+        if (position >= 0 && position < this.count) {
+          let node = this.head
+          for (let i = 0; i < position && node != null; i++) {
+            node = node.next
+          }
+          return node
+        }
+        return undefined
+      }
+      //remove(element):从链表中移除一个元素
+      remove(element) {
+        const position = this.indexOf(element)
+        return this.removeAt(position)
+      }
+      //indexOf(element):返回元素在链表中的索引,如果链表中没有该元素则返回-1
+      indexOf(element) {
+        let current = this.head
+        for (let i = 0; i < this.count && current != null; i++) {
+          if (this.equalsFn(element, current.element)) {
+            return i
+          }
+          current = current.next
+        }
+        return -1
+      }
+      //removeAt(position):移除链表中特定位置的元素,并将其返回
+      removeAt(position) {
+        if (position >= 0 && position < this.count) {
+          let current = this.head
+          if (position === 0) {
+            this.head = current.next
+          } else {
+            let previous = this.getElementAt(position - 1)
+            current = previous.next
+            previous.next = current.next
+          }
+          this.count--
+          return current.element
+        }
+        return undefined
+      }
+      //isEmpty():如果链表不包含任何元素返回true;如果链表长度大于0返回false
+      isEmpty() {
+        return this.size() === 0
+      }
+      //size():返回链表中的元素个数
+      size() {
+        return this.count
+      }
+      //toString():返回整个链表的字符串
+      toString() {
+        if (this.head == null) {
+          return ''
+        }
+        let objString = `${this.head.element}`
+        let current = this.head.next
+        for (let i = 0; i < this.count && current != null; i++) {
+          objString = `${objString},${current.element}`
+          current = current.next
+        }
+        return objString
+      }
+    }
+    class Node {
+      constructor(element) {
+        this.element = element
+        this.next = undefined
+      }
+    }
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class HashTableSeparateChaining {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //创建散列函数
+      loseloseHashCode(key) {
+        if (typeof key === 'number') {
+          return key
+        }
+        const tableKey = this.toStrFn(key)
+        let hash = 0
+        for (let i = 0; i < tableKey.length; i++) {
+          hash += tableKey.charCodeAt(i)
+        }
+        return hash % 37
+      }
+      hashCode(key) {
+        return this.loseloseHashCode(key)
+      }
+
+      //
+      isEmpty() {
+        return this.size === 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const keys = Object.keys(this.table)
+        let objString = `${keys[0]}=>${this.table[keys[0]].toString()}`
+        for (let i = 1; i < keys.length; i++) {
+          objString = `${objString},\n${keys[i]}=>${this.table[keys[i]].toString()}`
+        }
+        return objString
+      }
+      put(key, value) {
+        if (key !== null && value !== null) {
+          const position = this.hashCode(key)
+          if (this.table[position] == null) {
+            this.table[position] = new LinkedList()
+          }
+          this.table[position].push(new ValuePair(key, value))
+          return true
+        }
+        return false
+      }
+      get(key) {
+        const position = this.hashCode(key)
+        const linkedList = this.table[position]
+        if (linkedList != null && !linkedList.isEmpty()) {
+          let current = linkedList.getHead()
+          while (current != null) {
+            if (current.element.key === key) {
+              return current.element.value
+            }
+            current = current.next
+          }
+        }
+        return undefined
+      }
+      remove(key) {
+        const position = this.hashCode(key)
+        const linkedList = this.table[position]
+        if (linkedList != null && !linkedList.isEmpty()) {
+          let current = linkedList.getHead()
+          while (current != null) {
+            if (current.element.key === key) {
+              linkedList.remove(current.element)
+              if (linkedList.isEmpty()) {
+                delete this.table[position]
+              }
+              return true
+            }
+            current = current.next
+          }
+        }
+        return false
+      }
+    }
+    const hash = new HashTableSeparateChaining()
+    hash.put('Ygritte', 'Ygritte@email.com')
+    hash.put('Jonathan', 'Jonathan@email.com')
+    hash.put('Jamie', 'Jamie@email.com')
+    hash.put('Jack', 'Jack@email.com')
+    hash.put('Jasmine', 'Jasmine@email.com')
+    hash.put('Jake', 'Jake@email.com')
+    hash.put('Nathan', 'Nathan@email.com')
+    hash.put('Athelstan', 'athelstan@email.com')
+    hash.put('Sue', 'Sue@email.com')
+    hash.put('Aethelwulf', 'aethelwulf@email.com')
+    hash.put('Sargeras', 'Sargeras@email.com')
+    console.log(hash.toString())
+    hash.remove('Aethelwulf')
+    hash.remove('Sargeras')
+    console.log(hash.toString())
+    console.log(hash.get('Sue'))
+  </script>
+</body>
+
+</html>

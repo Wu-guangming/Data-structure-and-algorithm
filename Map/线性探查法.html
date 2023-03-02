@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class HashTableLinearPorbing {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //创建散列函数
+      loseloseHashCode(key) {
+        if (typeof key === 'number') {
+          return key
+        }
+        const tableKey = this.toStrFn(key)
+        let hash = 0
+        for (let i = 0; i < tableKey.length; i++) {
+          hash += tableKey.charCodeAt(i)
+        }
+        return hash % 37
+      }
+      hashCode(key) {
+        return this.loseloseHashCode(key)
+      }
+
+      //
+      isEmpty() {
+        return this.size === 0
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const keys = Object.keys(this.table)
+        let objString = `${keys[0]}=>${this.table[keys[0]].toString()}`
+        for (let i = 1; i < keys.length; i++) {
+          objString = `${objString},\n${keys[i]}=>${this.table[keys[i]].toString()}`
+        }
+        return objString
+      }
+      put(key, value) {
+        if (key != null && value != null) {
+          const position = this.hashCode(key)
+          if (this.table[position] == null) {
+            this.table[position] = new ValuePair(key, value)
+          } else {
+            let index = position + 1
+            while (this.table[index] != null) {
+              index++
+            }
+            this.table[index] = new ValuePair(key, value)
+          }
+          return true
+        }
+        return false
+      }
+      get(key) {
+        const position = this.hashCode(key)
+        if (this.table[position] != null) {
+          if (this.table[position].key === key) {
+            return this.table[position].value
+          }
+          let index = position + 1
+          while (this.table[index] != null && this.table[index].key !== key) {
+            index++
+          }
+          if (this.table[index] != null && this.table[index].key === key) {
+            return this.table[index].value
+          }
+        }
+        return undefined
+      }
+      remove(key) {
+        const position = this.hashCode(key)
+        if (this.table[position] != null) {
+          if (this.table[position].key === key) {
+            delete this.table[position]
+            this.varifyRemovSideEffect(key, position)
+            return true
+          }
+          let index = position + 1
+          while (this.table[index] != null && this.table[index].key !== key) {
+            index++
+          }
+          if (this.table[index] != null && this.table[index].key === key) {
+            delete this.table[position]
+            this.varifyRemovSideEffect(key, index)
+            return true
+          }
+        }
+        return false
+      }
+      varifyRemovSideEffect(key, removedPosition) {
+        const hash = this.hashCode(key)
+        let index = removedPosition + 1
+        while (this.table[index] != null) {
+          const posHash = this.hashCode(this.table[index].key)
+          if (posHash <= hash || posHash <= removedPosition) {
+            this.table[removedPosition] = this.table[index]
+            delete this.table[index]
+            removedPosition = index
+          }
+          index++
+        }
+      }
+    }
+    const hash = new HashTableLinearPorbing()
+    hash.put('Ygritte', 'Ygritte@email.com')
+    hash.put('Jonathan', 'Jonathan@email.com')
+    hash.put('Jamie', 'Jamie@email.com')
+    hash.put('Jack', 'Jack@email.com')
+    hash.put('Jasmine', 'Jasmine@email.com')
+    hash.put('Jake', 'Jake@email.com')
+    hash.put('Nathan', 'Nathan@email.com')
+    hash.put('Athelstan', 'athelstan@email.com')
+    hash.put('Sue', 'Sue@email.com')
+    hash.put('Aethelwulf', 'aethelwulf@email.com')
+    hash.put('Sargeras', 'Sargeras@email.com')
+    //console.log(hash.toString())
+    hash.remove('Aethelwulf')
+    hash.remove('Sargeras')
+    console.log(hash.toString())
+    console.log(hash.get('Sue'))
+  </script>
+</body>
+
+</html>
