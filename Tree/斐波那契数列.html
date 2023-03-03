@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    /* function fibonacciIterative(n) {
+      if (n === 0) {
+        return 0
+      } else if (n <= 2) {
+        return 1
+      } else {
+        let n1 = 1
+        let n2 = 2
+        let fin = 0
+        for (let i = 3; i < n; i++) {
+          fin = n1 + n2
+          n1 = n2
+          n2 = fin
+        }
+        return fin
+      }
+
+    }
+    console.log(fibonacciIterative(6))//8 */
+    function fibonacci(n) {
+      if (n === 0) return 0
+      if (n <= 2) return 1
+      return fibonacci(n - 1) + fibonacci(n - 2)
+    }
+    console.log(fibonacci(6))//8
+  </script>
+</body>
+
+</html>

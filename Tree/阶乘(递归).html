@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    /* function factorialIterative(number) {
+      if (number < 0) {
+        return undefined
+      } else {
+        for (let i = number - 1; i > 0; i--) {
+          number = number * i
+        }
+      }
+      return number
+    }
+    console.log(factorialIterative(5))//120 */
+    function factorial(number) {
+      if (number === 1) {
+        return 1
+      } else if (number === 0) {
+        return undefined
+      } else {
+        return number * factorial(number - 1)
+      }
+    }
+    console.log(factorial(5))//120
+    console.log(factorial(0))//undefined
+    console.log(factorial(1))//1
+  </script>
+</body>
+
+</html>

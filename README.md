@@ -1982,3 +1982,346 @@ const hash = new HashTableSeparateChaining()
 
 
 
+# 树(Tree)
+
+## 认识递归
+
+递归通常涉及调用函数自身,每个递归函数都要有一个基线条件,即一个不再递归条件(停止点),避免无限递归
+
+### 案例:一个数的阶乘
+
+​	迭代阶乘
+
+```
+function factorialIterative(number) {
+      if (number < 0) {
+        return undefined
+      } else {
+        for (let i = number - 1; i > 0; i--) {
+          number = number * i
+        }
+      }
+      return number
+    }
+    console.log(factorialIterative(5))//120
+```
+
+​	递归阶乘
+
+```
+function factorial(number) {
+      if (number === 1) {
+        return 1
+      } else if (number === 0) {
+        return undefined
+      } else {
+        return number * factorial(number - 1)
+      }
+    }
+    console.log(factorial(5))//120
+    console.log(factorial(0))//undefined
+    console.log(factorial(1))//1
+```
+
+### 案例二:斐波那契数列
+
+​	迭代
+
+```
+function fibonacciIterative(n) {
+      if (n === 0) {
+        return 0
+      } else if (n <= 2) {
+        return 1
+      } else {
+        let n1 = 1
+        let n2 = 2
+        let fin = 0
+        for (let i = 3; i < n; i++) {
+          fin = n1 + n2
+          n1 = n2
+          n2 = fin
+        }
+        return fin
+      }
+
+    }
+    console.log(fibonacciIterative(6))//8
+```
+
+​	递归
+
+```
+function fibonacci(n) {
+      if (n === 0) return 0
+      if (n <= 2) return 1
+      return fibonacci(n - 1) + fibonacci(n - 2)
+    }
+    console.log(fibonacci(6))//8
+```
+
+## 树相关术语
+
+树是非顺序数据结构
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230302143850851.png" alt="image-20230302143850851" style="zoom:80%;" />
+
+位于树顶的叫**根节点**,它没有父节点,树中的每个元素都叫节点,分为**内部节点**和**外部节点**,没有子元素的节点称作外部节点(叶子节点),至少有一个子节点的为内部节点;**子树**是由节点和它的后代构成;节点的**深度**取决于它祖先结点的个数;**树的高度**取决于所有节点深度的最大值
+
+**二叉树**中的节点最多只能有两个子节点;一个是左侧节点一个是右侧节点;
+
+**二叉搜索树(BST)**是二叉树的一种;但它只允许在左侧节点存储(比父节点)小的值,在右侧节点存储(比父节点)大的值
+
+## 创建BST
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230302164316226.png" alt="image-20230302164316226" style="zoom:80%;" />
+
+```
+const Compare = {
+      LESS_THAN: -1,
+      BIGGER_THAN: 1,
+      EQUALS: 0
+    };
+    //声明一个方法来比较节点值，判断元素存储到左侧节点还是右侧节点
+    function defaultCompare(a, b) {
+      if (a === b) {
+        return Compare.EQUALS;
+      }
+      return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN;
+    }
+    //表示每个节点
+    class Node {
+      constructor(key) {
+        this.key = key
+        this.left = null
+        this.right = null
+      }
+    }
+    class BinarySearchTree {
+      constructor(compareFn = defaultCompare) {
+        this.compareFn = compareFn
+        this.root = null
+      }
+      //insert(key):向树中插入一个新的键
+      insertNode(node, key) {
+        if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+          if (node.left == null) {
+            node.left = new Node(key)
+          } else {
+            this.insertNode(node.left, key)
+          }
+        } else {
+          if (node.right == null) {
+            node.right = new Node(key)
+          } else {
+            this.insertNode(node.right, key)
+          }
+        }
+      }
+      insert(key) {
+        if (this.root == null) {
+          this.root = new Node(key)
+        } else {
+          this.insertNode(this.root, key)
+        }
+      }
+     }
+    const tree = new BinarySearchTree()
+    tree.insert(11)
+    tree.insert(7)
+    tree.insert(15)
+    tree.insert(5)
+    tree.insert(3)
+    tree.insert(9)
+    tree.insert(8)
+    tree.insert(10)
+    tree.insert(13)
+    tree.insert(12)
+    tree.insert(14)
+    tree.insert(20)
+    tree.insert(18)
+    tree.insert(25)
+    tree.insert(6)
+```
+
+
+
+## 树的遍历(以BST为例)
+
+中序遍历:一种以上行顺序访问BST所有结点的遍历方式;它是从最小节点到最大结点的遍历顺序
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230302164518018.png" alt="image-20230302164518018" style="zoom:80%;" />
+
+```
+//inOrderTraverse():中序遍历所有节点
+      inOrderTraverse(callback) {
+        this.inOrderTraverseNode(this.root, callback)
+      }
+      inOrderTraverseNode(node, callback) {
+        if (node != null) {
+          this.inOrderTraverseNode(node.left, callback)
+          callback(node.key)
+          this.inOrderTraverseNode(node.right, callback)
+        }
+      }
+```
+
+先序遍历:以优先于后代节点的顺序访问每个节点
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230302165221038.png" alt="image-20230302165221038" style="zoom:80%;" />
+
+```
+//preOrderTraverse():先序遍历所有节点
+      preOrderTraverse(callback) {
+        this.preOrderTraverseNode(this.root, callback)
+      }
+      preOrderTraverseNode(node, callback) {
+        if (node != null) {
+          callback(node.key)
+          this.preOrderTraverseNode(node.left, callback)
+          this.preOrderTraverseNode(node.right, callback)
+        }
+      }
+```
+
+后序遍历:先访问节点的后代节点,再访问节点本身
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230302165444000.png" alt="image-20230302165444000" style="zoom:80%;" />
+
+```
+//postOrderTraverse():后序遍历所有节点
+      postOrderTraverse(callback) {
+        this.postOrderTraverseNode(this.root, callback)
+      }
+      postOrderTraverseNode(node, callback) {
+        if (node != null) {
+          this.postOrderTraverseNode(node.left, callback)
+          this.postOrderTraverseNode(node.right, callback)
+          callback(node.key)
+        }
+      }
+```
+
+## 搜索树中的值(以BST为例)
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303131043942.png" alt="image-20230303131043942" style="zoom:80%;" />
+
+从上图容易看到该树最后一层最左侧的节点3是最小值;最右侧节点25是最大值;
+
+因此对于寻找最小值,总是沿着树的最左边;对于寻找最大值,总是沿着树的最右边
+
+最小值搜索:
+
+```
+//min():返回树中最小值
+      minNode(node) {
+        let current = node
+        while (current != null && current.left != null) {
+          current = current.left
+        }
+        return current
+      }
+      min() {
+        return this.minNode(this.root)
+      }
+```
+
+最大值搜索:
+
+```
+//max():返回树中最大值
+      maxNode(node) {
+        let current = node
+        while (current != null && current.right != null) {
+          current = current.right
+        }
+        return current
+      }
+      max() {
+        return this.maxNode(this.root)
+      }
+```
+
+搜索特定值:
+
+```
+//search(key):在树中查找一个键;如果节点存在返回true;不存在返回false
+      searchNode(node, key) {
+        if (node == null) {
+          return false
+        } else if (this.compareFn(key, node.key) == Compare.LESS_THAN) {
+          return this.searchNode(node.left, key)
+        } else if (this.compareFn(key, node.key) == Compare.BIGGER_THAN) {
+          return this.searchNode(node.right, key)
+        } else {
+          return true
+        }
+      }
+      search(key) {
+        return this.searchNode(this.root, key)
+      }
+```
+
+## 移除一个节点(以BST为例)
+
+分三种情况
+
+移除一个没有后代节点的节点,只需将该节点为null并返回该节点
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303134705830.png" alt="image-20230303134705830" style="zoom:80%;" />
+
+
+
+移除有一个左侧节点或右侧节点的节点,需要将对该节点的引用改为对其左侧节点(或右侧节点)的引用,并返回更新后的节点
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303134726603.png" alt="image-20230303134726603" style="zoom:80%;" />
+
+移除有两个子节点的节点
+
+首先找到该节点右侧子树中的最小节点(继承者)
+
+然后用这个最小节点替换当前需要移除的节点(此时该节点被移除),同时将右侧子树中的最小节点移除
+
+最后返回更新后的节点的引用
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303135324728.png" alt="image-20230303135324728" style="zoom:80%;" />
+
+```
+//remove(key):移除某个键
+      remove(key) {
+        this.root = this.removeNode(this.root, key)
+        return this.root
+      }
+      removeNode(node, key) {
+        if (node == null) {
+          return null
+        }
+        if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+          node.left = this.removeNode(node.left, key)
+          return node
+        } else if (this.compareFn(key, node.key) === Compare.BIGGER_THAN) {
+          node.right = this.removeNode(node.right, key)
+          return node
+        } else {
+          //第一种情况
+          if (node.left == null && node.right == null) {
+            node = null
+            return node
+          }
+          //第二种情况
+          if (node.left == null) {
+            node = node.right
+            return node
+          } else if (node.right == null) {
+            node = node.left
+            return node
+          }
+          //第三种情况
+          const aux = this.minNode(node.right)
+          node.key = aux.key
+          node.right = this.removeNode(node.right, aux.key)
+          return node
+        }
+      }
+```
+
