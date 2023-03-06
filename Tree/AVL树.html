@@ -35,13 +35,6 @@
         this.compareFn = compareFn
         this.root = null
       }
-      //计算节点高度
-      getNodeHeight(node) {
-        if (node == null) {
-          return -1
-        }
-        return Math.max(this.getNodeHeight(node.left), this.getNodeHeight(node.right)) + 1
-      }
       //insert(key):向树中插入一个新的键
       insertNode(node, key) {
         if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
@@ -172,7 +165,130 @@
         }
       }
     }
-    const tree = new BinarySearchTree()
+    const BalanceFactor = {
+      UNBALANCED_RIGHT: 1,
+      SLIGHTLY_UNBALANCED_RIGHT: 2,
+      BALANCED: 3,
+      SLIGHTLY_UNBALANCED_LEFT: 4,
+      UNBALANCED_LEFT: 5
+    }
+    class AVLTree extends BinarySearchTree {
+      constructor(compareFn = defaultCompare) {
+        super(compareFn)
+        this.compareFn = compareFn
+        this.root = null
+      }
+      //计算节点高度
+      getNodeHeight(node) {
+        if (node == null) {
+          return -1
+        }
+        return Math.max(this.getNodeHeight(node.left), this.getNodeHeight(node.right)) + 1
+      }
+      //计算一个节点的平衡因子并返回
+      getBalanceFactor(node) {
+        const heightDifference = this.getNodeHeight(node.left) - this.getNodeHeight(node.right)
+        switch (heightDifference) {
+          case -2:
+            return BalanceFactor.UNBALANCED_RIGHT
+          case -1:
+            return BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT
+          case 1:
+            return BalanceFactor.SLIGHTLY_UNBALANCED_LEFT
+          case 2:
+            return BalanceFactor.UNBALANCED_LEFT
+          default:
+            return BalanceFactor.BALANCED
+        }
+      }
+      //LL
+      rotationLL(node) {
+        const temp = node.left
+        node.left = temp.right
+        temp.right = node
+        return temp
+      }
+      //RR
+      rotationRR(node) {
+        const temp = node.right
+        node.right = temp.left
+        temp.left = node
+        return temp
+      }
+      //LR
+      rotationLR(node) {
+        node.left = this.rotationRR(node.left)
+        return this.rotationLL(node)
+      }
+      //RL
+      rotationRL(node) {
+        node.right = this.rotationLL(node.right)
+        return this.rotationRR(node)
+      }
+      //insert(key):插入节点
+      insert(key) {
+        this.root = this.insertNode(this.root, key)
+      }
+      insertNode(node, key) {
+        if (node == null) {
+          return new Node(key)
+        } else if (this.compareFn(key, node.key) == Compare.LESS_THAN) {
+          node.left = this.insertNode(node.left, key)
+        } else if (this.compareFn(key, node.key) == Compare.BIGGER_THAN) {
+          node.right = this.insertNode(node.right, key)
+        } else {
+          return node
+        }
+        const balanceFactor = this.getBalanceFactor(node)
+        if (balanceFactor == BalanceFactor.UNBALANCED_LEFT) {
+          if (this.compareFn(key, node.left.key) == Compare.LESS_THAN) {
+            node = this.rotationLL(node)
+          } else {
+            return this.rotationLR(node)
+          }
+        }
+        if (balanceFactor == BalanceFactor.UNBALANCED_RIGHT) {
+          if (this.compareFn(key, node.right.key) == Compare.BIGGER_THAN) {
+            node = this.rotationRR(node)
+          } else {
+            return this.rotationRL(node)
+          }
+        }
+        return node
+      }
+      //remove(key):移除某个键
+      remove(key) {
+        this.root = this.removeNode(this.root, key)
+        return this.root
+      }
+      removeNode(node, key) {
+        node = super.removeNode(node, key)
+        if (node == null) {
+          return node
+        }
+        const balanceFactor = this.getBalanceFactor(node)
+        if (balanceFactor == BalanceFactor.UNBALANCED_LEFT) {
+          const balanceFactorLeft = this.getBalanceFactor(node.left)
+          if (balanceFactorLeft == BalanceFactor.BALANCED || balanceFactorLeft == BalanceFactor.SLIGHTLY_UNBALANCED_LEFT) {
+            return this.rotationLL(node)
+          }
+          if (balanceFactorLeft == BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT) {
+            return this.rotationLR(node.left)
+          }
+        }
+        if (balanceFactor == BalanceFactor.UNBALANCED_RIGHT) {
+          const balanceFactorRight = this.getBalanceFactor(node.right)
+          if (balanceFactorRight == BalanceFactor.BALANCED || balanceFactorRight == BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT) {
+            return this.rotationRR(node)
+          }
+          if (balanceFactorRight == BalanceFactor.SLIGHTLY_UNBALANCED_LEFT) {
+            return this.rotationRL(node.right)
+          }
+        }
+        return node
+      }
+    }
+    const tree = new AVLTree()
     tree.insert(11)
     tree.insert(7)
     tree.insert(15)
@@ -188,29 +304,12 @@
     tree.insert(18)
     tree.insert(25)
     tree.insert(6)
-    /*    tree.insert(27)
-       tree.insert(30)
-       tree.insert(46)
-       tree.insert(70) */
+    tree.insert(27)
+    tree.insert(30)
+    tree.insert(46)
+    tree.insert(70)
     console.log(tree)
-
-    console.log("中序遍历")
-    tree.inOrderTraverse((value) => {
-      console.log(value)
-    })
-    console.log("先序遍历")
-    tree.preOrderTraverse((value) => {
-      console.log(value)
-    })
-    console.log("后序遍历")
-    tree.postOrderTraverse((value) => {
-      console.log(value)
-    })
-    console.log("该树最小值:", tree.min())
-    console.log("该树最大值:", tree.max())
-    console.log(tree.search(12))
-    console.log(tree.remove(11))
-    //console.log(tree.getNodeHeight(2))
+    //console.log(tree.getNodeHeight(11))
   </script>
 </body>
 

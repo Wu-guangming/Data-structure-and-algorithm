@@ -1,5 +1,5 @@
 # Data-structure-and-algorithm
-***看看就好,别当真***
+**看看就好,别当真**
 
 数据结构与算法
 
@@ -2322,6 +2322,382 @@ const Compare = {
           node.right = this.removeNode(node.right, aux.key)
           return node
         }
+      }
+```
+
+## 自平衡二叉树(AVL树)
+
+BST存在一个问题就是取决于你添加的节点数,树的某条边可能会很深(即有很多层)
+
+但其它分支却只有几层;这样在添加,搜索和移除某些节点时会导致性能问题
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303160038525.png" alt="image-20230303160038525" style="zoom:80%;" />
+
+AVL树添加和移除节点时会保持自平衡,任意结点的左子树和右子树高度最多相差1
+
+创建AVL树
+
+```
+class AVLTree extends BinarySearchTree{
+      constructor(compareFn=defaultCompare){
+        super(compareFn)
+        this.compareFn=compareFn
+        this.root=null
+      }
+     }
+```
+
+计算节点高度
+
+```
+//计算节点高度
+      getNodeHeight(node){
+        if(node==null){
+          return -1
+        }
+        return Math.max(this.getNodeHeight(node.left),this.getNodeHeight(node.right))+1
+      }
+```
+
+计算**平衡因子**(在AVL树中,需要对每个节点计算其左子树高度(hl)和右子树高度(hr),该值(hr-hl)应为0,1或-1;如果不是这三个值之一就需要平衡该二叉树这就是平衡因子概念)
+
+```
+const BalanceFactor={
+      UNBALANCED_RIGHT:1,
+      SLIGHTLY_UNBALANCED_RIGHT:2,
+      BALANCED:3,
+      SLIGHTLY_UNBALANCED_LEFT:4,
+      UNBALANCED_LEFT:5
+    }
+```
+
+```
+//计算一个节点的平衡因子并返回
+      getBalanceFactor(node){
+        const heightDifference=this.getNodeHeight(node.left)-this.getNodeHeight(node.right)
+        switch(heightDifference){
+          case -2:
+            return BalanceFactor.UNBALANCED_RIGHT
+          case -1:
+            return BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT
+          case 1:
+            return BalanceFactor.SLIGHTLY_UNBALANCED_LEFT
+          case 2:
+            return BalanceFactor.UNBALANCED_LEFT
+          default:
+            return BalanceFactor.BALANCED
+        }
+      }
+```
+
+### 平衡操作--AVL旋转
+
+**左-左(LL):向右的单旋转**
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303164218644.png" alt="image-20230303164218644" style="zoom:67%;" />
+
+```
+ //LL
+      rotationLL(node) {
+        const temp = node.left
+        node.left = temp.right
+        temp.right = node
+        return temp
+      }
+```
+
+**右-右(RR):向左的单旋转**
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303165316884.png" alt="image-20230303165316884" style="zoom:67%;" />
+
+```
+//RR
+      rotationRR(node){
+        const temp=node.right
+        node.right=temp.left
+        temp.left=node
+        return temp
+      }
+```
+
+**左-右(LR):向右的双旋转(先LL旋转,再RR旋转)**
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230304145044852.png" alt="image-20230304145044852" style="zoom: 80%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303165635849.png" alt="image-20230303165635849" style="zoom:67%;" />
+
+```
+//LR
+      rotationLR(node){
+        node.left=this.rotationRR(node.left)
+        return this.rotationLL(node)
+      }
+```
+
+**右-左(RL):向左的双旋转(先RR旋转,再LL旋转)**
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230303165956872.png" alt="image-20230303165956872" style="zoom:67%;" />
+
+```
+//RL
+      rotationRL(node){
+        node.right=this.rotationLL(node.right)
+        return this.rotationRR(node)
+      }
+```
+
+### 向AVL树插入节点
+
+```
+//insert(key):插入节点
+      insert(key) {
+        this.root = this.insertNode(this.root, key)
+      }
+      insertNode(node, key) {
+        if (node == null) {
+          return new Node(key)
+        } else if (this.compareFn(key, node.key) == Compare.LESS_THAN) {
+          node.left = this.insertNode(node.left, key)
+        } else if (this.compareFn(key, node.key) == Compare.BIGGER_THAN) {
+          node.right = this.insertNode(node.right, key)
+        } else {
+          return node
+        }
+        const balanceFactor = this.getBalanceFactor(node)
+        if (balanceFactor == BalanceFactor.UNBALANCED_LEFT) {
+          if (this.compareFn(key, node.left.key) == Compare.LESS_THAN) {
+            node = this.rotationLL(node)
+          } else {
+            return this.rotationLR(node)
+          }
+        }
+        if (balanceFactor == BalanceFactor.UNBALANCED_RIGHT) {
+          if (this.compareFn(key, node.right.key) == Compare.BIGGER_THAN) {
+            node = this.rotationRR(node)
+          } else {
+            return this.rotationRL(node)
+          }
+        }
+        return node
+      }
+```
+
+### 从AVL树中移除节点
+
+```
+//remove(key):移除某个键
+      remove(key) {
+        this.root = this.removeNode(this.root, key)
+        return this.root
+      }
+      removeNode(node, key) {
+        node = super.removeNode(node, key)
+        if (node == null) {
+          return node
+        }
+        const balanceFactor = this.getBalanceFactor(node)
+        if (balanceFactor == BalanceFactor.UNBALANCED_LEFT) {
+          const balanceFactorLeft = this.getBalanceFactor(node.left)
+          if (balanceFactorLeft == BalanceFactor.BALANCED || balanceFactorLeft == BalanceFactor.SLIGHTLY_UNBALANCED_LEFT) {
+            return this.rotationLL(node)
+          }
+          if (balanceFactorLeft == BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT) {
+            return this.rotationLR(node.left)
+          }
+        }
+        if (balanceFactor == BalanceFactor.UNBALANCED_RIGHT) {
+          const balanceFactorRight = this.getBalanceFactor(node.right)
+          if (balanceFactorRight == BalanceFactor.BALANCED || balanceFactorRight == BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT) {
+            return this.rotationRR(node)
+          }
+          if (balanceFactorRight == BalanceFactor.SLIGHTLY_UNBALANCED_LEFT) {
+            return this.rotationRL(node.right)
+          }
+        }
+        return node
+      }
+```
+
+## 红黑树
+
+红黑树也是一个自平衡二叉树,如果需要多次插入和移除操作选择红黑树比较好;如果插入移除频率较低,搜索频率较高选择AVL树较好
+
+红黑树中每个节点遵循以下规则:
+
+1. 每个节点不是黑的就是红的
+2. 树的根节点是黑的
+3. 所有叶节点都是黑的(用null引用表示的节点)
+4. 如果一个节点是红的,那么它的两个子节点都是黑的
+5. 不能有两个相邻的红节点,一个红节点不能有红的父节点或子节点
+6. 从一个给定的节点到它的后代节点(到null叶节点)的所有路径包含相同数量的黑节点
+
+创建BlackRedTree
+
+```
+class BlackRedTree extends BinarySearchTree{
+      constructor(compareFn=defaultCompare){
+        super(compareFn)
+        this.compareFn=compareFn
+        this.root=null
+      }
+    }
+```
+
+向红黑树中插入节点
+
+```
+class RedBlackNode extends Node {
+      constructor(key) {
+        super(key)
+        this.key = key
+        this.color = Colors.RED
+        this.parent = null
+      }
+      isRed() {
+        return this.color === Colors.RED
+      }
+    }
+```
+
+```
+insert(key) {
+        if (this.root == null) {
+          this.root = new RedBlackTree(key)
+          this.root.color = Colors.BLACK
+        } else {
+          const newNode = this.insertNode(this.root, key)
+          this.fixTreeProperties(newNode)
+        }
+      }
+      insertNode(node, key) {
+        if (this.compareFn(key, node.key) == Compare.LESS_THAN) {
+          if (node.left == null) {
+            node.left = new RedBlackNode(key)
+            node.left.parent = node
+            return node.left
+          } else {
+            return this.insertNode(node.left, key)
+          }
+        } else if (node.right = null) {
+          node.right = new RedBlackNode(key)
+          node.right.parent = node
+          return node.right
+        } else {
+          return this.insertNode(node.right, key)
+        }
+      }
+```
+
+插入节点后验证红黑树属性
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230306130256952.png" alt="image-20230306130256952" style="zoom: 67%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230306135018237.png" alt="image-20230306135018237" style="zoom:80%;" />
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230306135037615.png" alt="image-20230306135037615" style="zoom:80%;" />
+
+```
+fixTreeProperties(node) {
+        //判断新节点，和新节点的父节点存不存在，以及父节点是否为红色，新节点是否为红色
+        while (node && node.parent && node.parent.color == Colors.RED && node.color != Colors.BLACK) {
+          let parent = node.parent;//获取父节点
+          const grandParent = parent.parent;//获取祖节点
+          //如果父节点是祖节点的左子节点
+          if (grandParent && grandParent.left == parent) {
+            //获取叔节点
+            const uncle = grandParent.right;
+            //如果叔节点存在，并且叔节点的颜色是红色
+            if (uncle && uncle.color == Colors.RED) {
+              grandParent.color = Colors.RED;
+              parent.color = Colors.BLACK;
+              uncle.color = Colors.BLACK;
+              node = grandParent;
+            } else {
+              //如果叔节点的颜色为黑色
+              //情形2A: 新节点位于父节点的右边
+              if (node == parent.right) {
+                this.rotationRR(parent);
+                node = parent;
+                parent = node.parent;
+              }
+              //情形3A: 新节点位于父节点的左边
+              this.rotationLL(grandParent);
+              parent.color = Colors.BLACK;//parent现在是祖节点
+              grandParent.color = Colors.RED;
+              node = parent;
+            }
+          } else {
+            //父节点是右侧子节点
+            const uncle = grandParent.left;
+            //情形1B: 叔节点是红色 
+            if (uncle && uncle.color !== Colors.BLACK) {
+              grandParent.color = Colors.RED;
+              parent.color = Colors.BLACK;
+              uncle.color = Colors.BLACK;
+              node = grandParent;
+            } else {
+              //情形2B: 
+              if (node == parent.left) {
+                this.rotationLL(parent);
+                node = parent;
+                parent = node.parent;
+              }
+              //情形3B: 
+              this.rotationRR(grandParent);
+              parent.color = Colors.BLACK;
+              grandParent.color = Colors.RED;
+              node = parent;
+            }
+          }
+        }
+        this.root.color = Colors.BLACK;
+      }
+      rotationLL(node) {
+        //获取父节点的左子节点
+        const tmp = node.left;
+        //父节点的左子节点指向tmp的右子节点
+        node.left = tmp.right;
+        //如果tmp的左子节点存在
+        if (tmp.right && tmp.right.key) {
+          //tmp的右子节点的父亲指向父节点
+          tmp.right.parent = node;
+        }
+        //tmp指向父节点的父亲;
+        tmp.parent = node.parent;
+        if (!node.parent) {
+          this.root = tmp;
+        } else {
+          //判断父节点是祖节点的左节点还是右节点
+          if (node == node.parent.left) {
+            //祖节点的左子节点是tmp
+            node.parent.left = tmp;
+          } else {
+            node.parent.right = tmp;
+          }
+        }
+        //父节点成为tmp的右子节点
+        tmp.right = node;
+        //父节点的父亲是tmp
+        node.parent = tmp;
+      }
+      rotationRR(node) {
+        const tmp = node.right;
+        node.right = tmp.left;
+        if (tmp.left && tmp.left.key) {
+          tmp.left.parent = node;
+        }
+        tmp.parent = node.parent;
+        if (!node.parent) {
+          this.root = tmp;
+        } else {
+          if (node == node.parent.left) {
+            node.parent.left = tmp;
+          } else {
+            node.parent.right = tmp;
+          }
+        }
+        tmp.left = node;
+        node.parent = tmp;
       }
 ```
 
