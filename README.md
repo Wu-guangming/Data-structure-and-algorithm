@@ -2701,3 +2701,243 @@ fixTreeProperties(node) {
       }
 ```
 
+# 堆(Heap)
+
+二叉堆是一种特殊的二叉树.特性:
+
+1. 它是一个完全二叉树,即树的每一层都有左侧和右侧子节点(最后一层叶节点除外),并且最后一层叶节点都尽可能是左侧子节点,这叫结构特性
+2. 二叉堆不是最小堆就是最大堆;最小堆允许导出树的最小值,最大堆允许导出树的最大值;所有的节点都小于等于(最小堆)或大于等于(最大堆)每个它的子节点,这叫堆特性
+
+## 创建最小堆类
+
+```
+const Compare = {
+      LESS_THAN: -1,
+      BIGGER_THAN: 1,
+      EQUALS: 0
+    };
+    //声明一个方法来比较节点值，判断元素存储到左侧节点还是右侧节点
+    function defaultCompare(a, b) {
+      if (a === b) {
+        return Compare.EQUALS;
+      }
+      return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN;
+    }
+    class MinHeap {
+      constructor(compareFn = defaultCompare) {
+        this.compareFn = compareFn
+        this.heap = []
+      }
+     }
+```
+
+根据给定index查找其左右节点在数组中的位置及其父节点在数组中的位置
+
+```
+getLeftIndex(index) {
+        return 2 * index + 1
+      }
+      getRightIndex(index) {
+        return 2 * index + 2
+      }
+      getParentIndex(index) {
+        if (index === 0) {
+          return undefined
+        }
+        return Math.floor((index - 1) / 2)
+      }
+```
+
+insert(value):向堆中插入一个新值,成功返回true,失败返回false
+
+插入是将新值插入到堆底部叶节点(数组中最后一个位置),再执行siftUp方法,将值上移和其父节点交换,直到父节点小于这个新值
+
+```
+//insert(value):向堆中插入一个新值,成功返回true,失败返回false
+      insert(value) {
+        if (value != null) {
+          this.heap.push(value)
+          this.siftUp(this.heap.length - 1)
+          return true
+        }
+        return false
+      }
+      siftUp(index) {
+        let parent = this.getParentIndex(index)
+        while (index > 0 && this.compareFn(this.heap[parent], this.heap[index]) > Compare.BIGGER_THAN) {
+          swap(this.heap, parent, index)
+          parent = this.getParentIndex(index)
+        }
+      }
+```
+
+交换函数如下
+
+```
+    function swap(array, a, b) {
+      const temp = array[a]
+      array[a] = array[b]
+      array[b] = temp
+    }
+```
+
+findMinimum():返回最小值(最小堆)或最大值(最大堆)且不会移除
+
+```
+size() {
+        return this.heap.length
+      }
+      isEmpty() {
+        return this.size() === 0
+      }
+      findMinimum() {
+        return this.isEmpty() ? undefined : this.heap[0]
+      }
+```
+
+extract():移除最小值(最小堆)或移除最大值(最大堆),并将该值返回
+
+再将堆的第一个元素移除后,我们将数组的最后一个元素移到根部并执行siftDown函数,直到堆结构正常为止
+
+```
+//extract():移除最小值(最小堆)或移除最大值(最大堆),并将该值返回
+      extract() {
+        if (this.size() === 0) {
+          return undefined
+        }
+        if (this.size() === 1) {
+          return this.heap.shift()
+        }
+        const removedValue = this.heap.shift()
+        this.siftDown(0)
+        return removedValue
+
+      }
+      siftDown(index) {
+        let element = index
+        const left = this.getLeftIndex(index)
+        const right = this.getRightIndex(index)
+        const size = this.size()
+        if (left < size && this.compareFn(this.heap[element], this.heap[left]) === Compare.BIGGER_THAN) {
+          element = left
+        }
+        if (right < size && this.compareFn(this.heap[element], this.heap[right]) === Compare.BIGGER_THAN) {
+          element = right
+        }
+        if (index != element) {
+          swap(this.heap, index, element)
+          this.siftDown(element)
+        }
+      }
+```
+
+测试代码:
+
+```
+const heap = new MinHeap()
+    console.log(heap.isEmpty())
+    heap.insert(2)
+    heap.insert(3)
+    heap.insert(4)
+    heap.insert(5)
+    heap.insert(1)
+    console.log(heap)
+    console.log(heap.size())
+    console.log(heap.isEmpty())
+    console.log(heap.findMinimum())
+    console.log(heap.extract())
+```
+
+## 创建最大堆类
+
+MaxHeap类的算法和MinHeap类的算法一模一样,不同之处在于我们要把所有的>(大于)换成<(小于)
+
+```
+class MaxHeap extends MinHeap {
+      constructor(compareFn = defaultCompare) {
+        super(compareFn)
+        this.compareFn = reverseCompare(compareFn)
+      }
+    }
+```
+
+比较的反转
+
+```
+function reverseCompare(compareFn) {
+      return (a, b) => compareFn(b, a)
+    }
+```
+
+测试代码
+
+```
+const heap = new MaxHeap()
+    console.log(heap.isEmpty())
+    heap.insert(2)
+    heap.insert(3)
+    heap.insert(4)
+    heap.insert(5)
+    heap.insert(1)
+    console.log(heap)
+    console.log(heap.size())
+    console.log(heap.isEmpty())
+    console.log(heap.findMinimum())
+```
+
+## 堆排序
+
+以最大堆为例:
+
+1. 用数组创建一个最大堆用作源数据
+2. 在创建最大堆后,其最大值会在堆的第一个位置,我们将其替换为堆的最后一个值,将堆的大小减1
+3. 最后我们将堆的根节点下移并重复步骤2直到堆的大小为1
+
+最后我们利用最大堆得到一个升序数组(利用最小堆得到降序)
+
+```
+//下移操作
+    function heapify(arr, i, len) {     //堆调整
+      var left = 2 * i + 1,
+        right = 2 * i + 2,
+        largest = i;
+
+      if (left < len && arr[left] > arr[largest]) {
+        largest = left;
+      }
+
+      if (right < len && arr[right] > arr[largest]) {
+        largest = right;
+      }
+
+      if (largest != i) {
+        swap(arr, i, largest);
+        heapify(arr, largest, len - 1);
+      }
+    }
+    //堆排序算法(升序)
+    function heapSort(array, compareFn = defaultCompare) {
+      let heapSize = array.length
+      buildMaxHeap(array, compareFn)
+      while (heapSize > 1) {
+        swap(array, 0, --heapSize)
+        heapify(array, 0, heapSize, compareFn)
+      }
+      return array
+    }
+    function buildMaxHeap(array, compareFn) {
+      for (let i = Math.floor(array.length / 2); i >= 0; i -= 1) {
+        heapify(array, i, array.length, compareFn)
+      }
+      return array
+    }
+```
+
+测试
+
+```
+    const arr = [7, 6, 3, 5, 4, 1, 2]
+    console.log(arr)//[7, 6, 3, 5, 4, 1, 2]
+    console.log(heapSort(arr))//[1, 2, 3, 4, 5, 6, 7]
+```
+
