@@ -2893,6 +2893,8 @@ const heap = new MaxHeap()
 2. 在创建最大堆后,其最大值会在堆的第一个位置,我们将其替换为堆的最后一个值,将堆的大小减1
 3. 最后我们将堆的根节点下移并重复步骤2直到堆的大小为1
 
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230308152032041.png" alt="image-20230308152032041" style="zoom:80%;" />
+
 最后我们利用最大堆得到一个升序数组(利用最小堆得到降序)
 
 ```
