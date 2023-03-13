@@ -2943,3 +2943,329 @@ const heap = new MaxHeap()
     console.log(heapSort(arr))//[1, 2, 3, 4, 5, 6, 7]
 ```
 
+# 图(Graph)
+
+图是一组由**边**连接的**节点**
+
+由一条边连接的顶点为**相邻顶点**,一个顶点的**度**是其相邻顶点的数量,**路径**是顶点v1,v2.....vk的一个连续序列其中vk和v(k+1)是相邻的
+
+**环**也是路径(最后一个顶点重新回到起点),如果图中不存在环,则称该图是无环的;如果图中的每两个顶点都存在路径,则称该图是**连通的**
+
+图可以是**无向的**(边没有方向)也可以是**有向的**(边有方向);
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311153314072.png" alt="image-20230311153314072" style="zoom:80%;" />
+
+如果图中的每两个顶点在双向上都存在路径,则称该图是**强连通的**
+
+图还可以是**未加权**的或是**加权**的
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311153515261.png" alt="image-20230311153515261" style="zoom:80%;" />
+
+图的表示
+
+![image-20230311153930524](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311153930524.png)
+
+![image-20230311153949772](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311153949772.png)
+
+![image-20230311154124527](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311154124527.png)
+
+## 创建Graph类
+
+其中用到了数组来存储顶点;用字典来存储邻接链表(顶点为键,邻接顶点列表为值)
+
+```
+class Graph {
+      constructor(isDirected = false) {
+        this.isDirected = isDirected
+        this.vertices = []
+        this.adjList = new Dictionary()
+      }
+      //addVertex(v):向图中添加一个新的顶点
+      addVertex(v) {
+        if (!this.vertices.includes(v)) {
+          this.vertices.push(v)
+          this.adjList.set(v, [])
+        }
+      }
+      //addEdge(v,w):添加顶点之间的边
+      addEdge(v, w) {
+        if (!this.adjList.get(v)) {
+          this.addVertex(v)
+        }
+        if (!this.adjList.get(w)) {
+          this.addVertex(w)
+        }
+        this.adjList.get(v).push(w)
+        if (!this.isDirected) {
+          this.adjList.get(w).push(v)
+        }
+      }
+      //getVertices():返回顶点列表
+      getVertices() {
+        return this.vertices
+      }
+      //getAdjList():返回邻接表
+      getAdjList() {
+        return this.adjList
+      }
+      toString() {
+        let s = ''
+        for (let i = 0; i < this.vertices.length; i++) {
+          s += `${this.vertices[i]} -> `
+          const neighbors = this.adjList.get(this.vertices[i])
+          for (let j = 0; j < neighbors.length; j++) {
+            s += `${neighbors[j]}`
+          }
+          s += '\n'
+        }
+        return s
+      }
+    }
+```
+
+测试代码
+
+```
+const graph = new Graph()
+    const myVertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    for (let i = 0; i < myVertices.length; i++) {
+      graph.addVertex(myVertices[i])
+    }
+    graph.addEdge('A', 'B')
+    graph.addEdge('A', 'C')
+    graph.addEdge('A', 'D')
+    graph.addEdge('C', 'D')
+    graph.addEdge('C', 'G')
+    graph.addEdge('D', 'G')
+    graph.addEdge('D', 'H')
+    graph.addEdge('B', 'E')
+    graph.addEdge('B', 'F')
+    graph.addEdge('E', 'I')
+    console.log(graph.toString())
+```
+
+结果如图:
+
+<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230311161103983.png" alt="image-20230311161103983" style="zoom:80%;" />
+
+## 图的遍历
+
+图遍历的算法思想是追踪每一个第一次访问的节点;同时还要追踪有哪些节点还没有被完全探索;完全探索一个顶点每一条边,对于每一条边所连接的还没有被访问的顶点,将其标注为被发现的,同时将其加入到待访问的节点列表中
+
+![image-20230313132552258](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230313132552258.png)
+
+当标注已经访问过的顶点时,我们用三种颜色表示其状态:
+
+- 白色:表示该顶点还没有被访问
+- 灰色:表示该顶点被访问过,但未被探索过
+- 黑色:表示该顶点被访问过且被完全探索过
+
+Colors变量
+
+```
+const Colors={
+      WHITE:0,
+      GRAY:1,
+      BLACK:2
+    }
+```
+
+初始化每个顶点颜色为白色
+
+```
+const initializeColor=vertices=>{
+      const color={}
+      for(let i=0;i<vertices.length;i++){
+        color[vertices[i]]=Colors.WHITE
+      }
+      return color
+    }
+```
+
+## 广度优先搜索(breadFirstSearch-BFS)
+
+![image-20230313135430814](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230313135430814.png)
+
+BFS代码:
+
+​	参数callback是可选的,如果传递就会执行,不传就不执行
+
+```
+const BFS = (graph, starVertex, callback) => {
+      const vertices = graph.getVertices()
+      const adjList = graph.getAdjList()
+      const color = initializeColor(vertices)
+      const queue = new Queue()
+      queue.enqueue(starVertex)
+      while (!queue.isEmpty()) {
+        const u = queue.dequeue()
+        const neighbors = adjList.get(u)
+        color[u] = Colors.GRAY
+        for (let i = 0; i < neighbors.length; i++) {
+          const w = neighbors[i]
+          if (color[w] === Colors.WHITE) {
+            color[w] = Colors.GRAY
+            queue.enqueue(w)
+          }
+        }
+        color[u] = Colors.BLACK
+        if (callback) {
+          callback(u)
+        }
+      }
+    }
+```
+
+测试代码:
+
+```
+const graph = new Graph()
+    const myVertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    for (let i = 0; i < myVertices.length; i++) {
+      graph.addVertex(myVertices[i])
+    }
+    graph.addEdge('A', 'B')
+    graph.addEdge('A', 'C')
+    graph.addEdge('A', 'D')
+    graph.addEdge('C', 'D')
+    graph.addEdge('C', 'G')
+    graph.addEdge('D', 'G')
+    graph.addEdge('D', 'H')
+    graph.addEdge('B', 'E')
+    graph.addEdge('B', 'F')
+    graph.addEdge('E', 'I')
+    console.log(graph.toString())
+    const printVertex = (value) => {
+      console.log('Visited vertex: ' + value)
+    }
+    BFS(graph, myVertices[0], printVertex)
+```
+
+给定一个图G和一个源顶点v,寻找每一个顶点u到顶点v的的最短距离(以边的数量为衡量依据)
+
+从v到u的距离distance[u]
+
+前溯点predecessors[u],用来推导v到其他各个顶点u的最短路径
+
+```
+//bfs查找源顶点到其他顶点的最短路径
+    const bfs = (graph, starVertex) => {
+      const vertices = graph.getVertices()
+      const adjList = graph.getAdjList()
+      const color = initializeColor(vertices)
+      const distances = {}
+      const predecessors = {}
+      const queue = new Queue()
+      queue.enqueue(starVertex)
+      for (let i = 0; i < vertices.length; i++) {
+        distances[vertices[i]] = 0
+        predecessors[vertices[i]] = null
+      }
+      while (!queue.isEmpty()) {
+        const u = queue.dequeue()
+        const neighbors = adjList.get(u)
+        color[u] = Colors.GRAY
+        for (let i = 0; i < neighbors.length; i++) {
+          const w = neighbors[i]
+          if (color[w] === Colors.WHITE) {
+            color[w] = Colors.GRAY
+            distances[w] = distances[u] + 1
+            predecessors[w] = u
+            queue.enqueue(w)
+          }
+        }
+        color[u] = Colors.BLACK
+      }
+      return {
+        distances,
+        predecessors
+      }
+    }
+```
+
+测试(在之前BFS的基础上测试bfs)
+
+```
+const shortestPathA = bfs(graph, myVertices[0])
+console.log(shortestPathA)
+```
+
+通过前溯点数组,利用下段代码可以得到A到其他顶点最短路径
+
+```
+    const fromVertex = myVertices[0]
+    for (let i = 0; i < myVertices.length; i++) {
+      const toVertex = myVertices[i]
+      const path = new Stack()
+      for (let v = toVertex; v != fromVertex; v = shortestPathA.predecessors[v]) {
+        path.push(v)
+      }
+      path.push(fromVertex)
+      let s = path.pop()
+      while (!path.isEmpty()) {
+        s += ' - ' + path.pop()
+      }
+      console.log(s)
+    }
+```
+
+## 深度优先搜索(depthFirstSearch-DFS)
+
+![image-20230313144341919](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230313144341919.png)
+
+代码实现
+
+```
+    const DFS = (graph, callback) => {
+      const vertices = graph.getVertices()
+      const adjList = graph.getAdjList()
+      const color = initializeColor(vertices)
+      for (let i = 0; i < vertices.length; i++) {
+        if (color[vertices[i]] == Colors.WHITE) {
+          DFSVisit(vertices[i], color, adjList, callback)
+        }
+      }
+    }
+    const DFSVisit = (u, color, adjList, callback) => {
+      color[u] = Colors.GRAY
+      if (callback) {
+        callback(u)
+      }
+      const neighbors = adjList.get(u)
+      for (let i = 0; i < neighbors.length; i++) {
+        const w = neighbors[i]
+        if (color[w] == Colors.WHITE) {
+          DFSVisit(w, color, adjList, callback)
+        }
+      }
+      color[u] = Colors.BLACK
+    }
+```
+
+测试
+
+```
+    const graph = new Graph()
+    const myVertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    for (let i = 0; i < myVertices.length; i++) {
+      graph.addVertex(myVertices[i])
+    }
+    graph.addEdge('A', 'B')
+    graph.addEdge('A', 'C')
+    graph.addEdge('A', 'D')
+    graph.addEdge('C', 'D')
+    graph.addEdge('C', 'G')
+    graph.addEdge('D', 'G')
+    graph.addEdge('D', 'H')
+    graph.addEdge('B', 'E')
+    graph.addEdge('B', 'F')
+    graph.addEdge('E', 'I')
+    console.log(graph.toString())
+
+    const printVertex = (value) => {
+      console.log('Visited vertex: ' + value)
+    }
+    DFS(graph, printVertex)
+```
+
+![image-20230313161026753](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20230313161026753.png)

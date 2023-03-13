@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function defaultToString(item) {
+      if (item == null) {
+        return 'NULL'
+      } else if (item == undefined) {
+        return 'UNDEFINED'
+      } else if (typeof item == 'string' || item instanceof String) {
+        return `${item}`
+      } else {
+        return item.toString()
+      }
+    }
+    class ValuePair {
+      constructor(key, value) {
+        this.key = key
+        this.value = value
+      }
+      toString() {
+        return `[${this.key}:${this.value}]`
+      }
+    }
+    class Stack {
+      constructor() {
+        this.count = 0;
+        this.items = {};
+      }
+      push(element) {
+        this.items[this.count] = element
+        this.count++
+      }
+      pop() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        this.count--
+        let result = this.items[this.count]
+        delete this.items[this.count]
+        return result;
+      };
+      peek() {
+        if (this.isEmpty()) {
+          return undefined
+        }
+        return this.items[this.count - 1]
+      };
+      isEmpty() {
+        return this.count === 0
+      };
+      clear() {
+        this.count = 0
+        this.items = {}
+      };
+      size() {
+        return this.count
+      };
+      //打印栈中所有元素
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        let objString = `${this.items[0]}`
+        for (let i = 1; i < this.count; i++) {
+          objString = `${objString},${this.items[i]}`
+        }
+        return objString
+      }
+    }
+    class Dictionary {
+      constructor(toStrFn = defaultToString) {
+        this.toStrFn = toStrFn
+        this.table = {}
+      }
+      //set(key,value):像字典中添加新的键值对,如果键名已存在,那么其对应的值会被新值覆盖
+      set(key, value) {
+        if (key !== null && value !== null) {
+          const tableKey = this.toStrFn(key)
+          this.table[tableKey] = new ValuePair(key, value)
+          return true
+        }
+        return false
+      }
+      //remove(key):通过键值作为参数移除字典中对应的数据值
+      remove(key) {
+        if (this.hasKey(key)) {
+          delete this.table[this.toStrFn(key)]
+          return true
+        }
+        return false
+      }
+      //hasKey(key):如果某个键值存在于字典中,返回true,否则返回false
+      hasKey(key) {
+        return this.table[this.toStrFn(key)] !== null
+      }
+      //get(key):通过以键值作为参数查找特定数值并返回
+      get(key) {
+        const valuePair = this.table[this.toStrFn(key)]
+        return valuePair == null ? undefined : valuePair.value
+      }
+      //clear():删除该字典中的所有值
+      clear() {
+        this.table = {}
+      }
+      //size():返回字典中所包含的值的数量,和数组的length相似
+      size() {
+        return Object.keys(this.table).length
+      }
+      //isEmpty():size等于0时返回true,否则返回false
+      isEmpty() {
+        return this.size === 0
+      }
+      //keys():将字典所包含的键名以数组形式返回
+      keys() {
+        return this.keyValues().map(valuePair => valuePair.key)
+      }
+      //values():将字典所包含的值以数组形式返回
+      values() {
+        return this.keyValues().map(valuePair => valuePair.value)
+      }
+      //keyValues():将字典中的所有[键,值]对返回
+      keyValues() {
+        return Object.values(this.table)
+      }
+      //forEach(callbackFn):迭代字典中所有键值对,callbackFn两个参数key和value;该方法在回调函数返回值false终止
+      forEach(callbackFn) {
+        const valuePair = this.keyValues()
+        for (let i = 0; i < valuePair.length; i++) {
+          const result = callbackFn(valuePair[i].key, valuePair[i].value)
+          if (result === false) {
+            break
+          }
+        }
+      }
+      //toString()
+      toString() {
+        if (this.isEmpty()) {
+          return ''
+        }
+        const valuePair = this.keyValues()
+        let objString = `${valuePair[0].toString()}`
+        for (let i = 1; i < valuePair.length; i++) {
+          objString = `${objString},${valuePair[i].toString()}`
+        }
+        return objString
+      }
+    }
+    const Colors = {
+      WHITE: 0,
+      GRAY: 1,
+      BLACK: 2
+    }
+    //初始化每个顶点颜色
+    const initializeColor = vertices => {
+      const color = {}
+      for (let i = 0; i < vertices.length; i++) {
+        color[vertices[i]] = Colors.WHITE
+      }
+      return color
+    }
+    class Graph {
+      constructor(isDirected = false) {
+        this.isDirected = isDirected
+        this.vertices = []
+        this.adjList = new Dictionary()
+      }
+      //addVertex(v):向图中添加一个新的顶点
+      addVertex(v) {
+        if (!this.vertices.includes(v)) {
+          this.vertices.push(v)
+          this.adjList.set(v, [])
+        }
+      }
+      //addEdge(v,w):添加顶点之间的边
+      addEdge(v, w) {
+        if (!this.adjList.get(v)) {
+          this.addVertex(v)
+        }
+        if (!this.adjList.get(w)) {
+          this.addVertex(w)
+        }
+        this.adjList.get(v).push(w)
+        if (!this.isDirected) {
+          this.adjList.get(w).push(v)
+        }
+      }
+      //getVertices():返回顶点列表
+      getVertices() {
+        return this.vertices
+      }
+      //getAdjList():返回邻接表
+      getAdjList() {
+        return this.adjList
+      }
+      toString() {
+        let s = ''
+        for (let i = 0; i < this.vertices.length; i++) {
+          s += `${this.vertices[i]} -> `
+          const neighbors = this.adjList.get(this.vertices[i])
+          for (let j = 0; j < neighbors.length; j++) {
+            s += `${neighbors[j]}`
+          }
+          s += '\n'
+        }
+        return s
+      }
+    }
+    const DFS = (graph, callback) => {
+      const vertices = graph.getVertices()
+      const adjList = graph.getAdjList()
+      const color = initializeColor(vertices)
+      for (let i = 0; i < vertices.length; i++) {
+        if (color[vertices[i]] == Colors.WHITE) {
+          DFSVisit(vertices[i], color, adjList, callback)
+        }
+      }
+    }
+    const DFSVisit = (u, color, adjList, callback) => {
+      color[u] = Colors.GRAY
+      if (callback) {
+        callback(u)
+      }
+      const neighbors = adjList.get(u)
+      for (let i = 0; i < neighbors.length; i++) {
+        const w = neighbors[i]
+        if (color[w] == Colors.WHITE) {
+          DFSVisit(w, color, adjList, callback)
+        }
+      }
+      color[u] = Colors.BLACK
+    }
+    const graph = new Graph()
+    const myVertices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+    for (let i = 0; i < myVertices.length; i++) {
+      graph.addVertex(myVertices[i])
+    }
+    graph.addEdge('A', 'B')
+    graph.addEdge('A', 'C')
+    graph.addEdge('A', 'D')
+    graph.addEdge('C', 'D')
+    graph.addEdge('C', 'G')
+    graph.addEdge('D', 'G')
+    graph.addEdge('D', 'H')
+    graph.addEdge('B', 'E')
+    graph.addEdge('B', 'F')
+    graph.addEdge('E', 'I')
+    console.log(graph.toString())
+
+    const printVertex = (value) => {
+      console.log('Visited vertex: ' + value)
+    }
+    DFS(graph, printVertex)
+  </script>
+</body>
+
+</html>
